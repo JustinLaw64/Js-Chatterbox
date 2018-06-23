@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using FileIO = System.IO.File;
 using DirectoryIO = System.IO.Directory;
 using JsChatterBox.Networking;
-using JsChatterBox.Networking.Implementations;
 
 namespace JsChatterBox
 {
@@ -22,7 +21,7 @@ namespace JsChatterBox
 
             return NewWindow;
         }
-        public static ClientWindow OpenChatConnection(String HostName, int Port)
+        public static ClientWindow OpenChatWindow(String HostName, int Port)
         {
             HostInformation NewInfo = new HostInformation(HostName, Port);
             DataManager.HostList.RecentHosts.Remove(NewInfo);

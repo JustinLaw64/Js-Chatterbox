@@ -118,14 +118,7 @@ namespace JsChatterBox.Networking
     public class PeerConnection : IDisposable
     {
         // Creation and Destruction
-        public PeerConnection(PeerIdentity ThisPeerID)
-        {
-            _SocketAdapter = new SocketEncoderAssembly();
-            _MessageQueue = new List<JsEncoder.ValueBase>();
-            _MessageOutput = new List<PeerMessageDigested>();
-
-            _ThisPeerID = ThisPeerID;
-        }
+        public PeerConnection(PeerIdentity ThisPeerID) { _ThisPeerID = ThisPeerID; }
         public PeerConnection(PeerIdentity ThisPeerID, TcpSocketClient Socket) : this(ThisPeerID) { BeginConnect(Socket); }
         public void Dispose()
         {
@@ -227,7 +220,7 @@ namespace JsChatterBox.Networking
                     // ## BEGIN Receive
 
                     // Check on what was received.
-                    JsEncoder.ValueBase[] output = _SocketAdapter.ReceiveOutput();
+                    JsEncoder.ValueBase[] output = _SocketEncoder.ReceiveOutput();
                     foreach (JsEncoder.ValueBase item in output)
                     {
                         // Debug
@@ -254,12 +247,12 @@ namespace JsChatterBox.Networking
                                     ChangeConnectionStatusValue(1);
                             }
                         }
-                        else if (mh == "IDCHANGE")
-                        {
-                            JsEncoder.TableValue NewIDRaw = (JsEncoder.TableValue)m.contents1V;
-                            PeerIdentity NewID = PeerIdentity.FromTable(NewIDRaw);
-                            _OtherPeerID = NewID;
-                        }
+                        //else if (mh == "IDCHANGE")
+                        //{
+                        //    JsEncoder.TableValue NewIDRaw = (JsEncoder.TableValue)m.contents1V;
+                        //    PeerIdentity NewID = PeerIdentity.FromTable(NewIDRaw);
+                        //    _OtherPeerID = NewID;
+                        //}
                         else if (mh == "DISCONNECTING")
                         {
                             if (_ConnectionStatus == 1)
@@ -291,7 +284,7 @@ namespace JsChatterBox.Networking
                     // Send the pending messages
                     // Don't send anything on 3 because we want to stop communications on that stage.
                     if (_ConnectionStatus == 1 || _ConnectionStatus == 2)
-                        _SocketAdapter.InputData(_MessageQueue.ToArray());
+                        _SocketEncoder.InputData(_MessageQueue.ToArray());
                     _MessageQueue.Clear();
 
                     // ## END Send
@@ -300,8 +293,8 @@ namespace JsChatterBox.Networking
 #if !EXPOSE_ERRORS
             catch (Exception e)
             {
-                OnDisconnection();
-                LogSystemHumanMessage(string.Concat("The peer connection crashed due to an error. Error Message: ", e.Message));
+                DropConnection();
+                LogSystemHumanMessage(string.Concat("You lost connection due to an error. Error Message: ", e.Message));
             }
 #endif
         }
@@ -318,7 +311,7 @@ namespace JsChatterBox.Networking
                     LogSystemHumanMessage("Connecting...");
 
                     _Socket = Socket;
-                    _SocketAdapter.Socket = Socket;
+                    _SocketEncoder.Socket = Socket;
 
                     ChangeConnectionStatusValue(2);
                 }
@@ -391,7 +384,7 @@ namespace JsChatterBox.Networking
                     OwnsSocket = false;
                 }
                 _Socket = null;
-                _SocketAdapter.Socket = null;
+                _SocketEncoder.Socket = null;
             }
 
             _GreetingSent = false;
@@ -402,26 +395,26 @@ namespace JsChatterBox.Networking
             _HeartBeatSendTimer = 0;
             _HeartBeatTimeout = 0;
         }
-        public void ChangeID(PeerIdentity NewID)
-        {
-            AssertNotDisposed();
+        //public void ChangeID(PeerIdentity NewID)
+        //{
+        //    AssertNotDisposed();
 
-            string NewName = NewID.Name;
-            if (NewName != null && NewName != "")
-            {
-                _ThisPeerID = NewID;
-                if (_ConnectionStatus != 0)
-                {
-                    JsEncoder.ValueBase[] Param2 = new JsEncoder.ValueBase[1];
-                    Param2[0] = PeerIdentity.ToTable(NewID);
-                    SendMessage("IDCHANGE", Param2);
-                }
+        //    string NewName = NewID.Name;
+        //    if (NewName != null && NewName != "")
+        //    {
+        //        _ThisPeerID = NewID;
+        //        if (_ConnectionStatus != 0)
+        //        {
+        //            JsEncoder.ValueBase[] Param2 = new JsEncoder.ValueBase[1];
+        //            Param2[0] = PeerIdentity.ToTable(NewID);
+        //            SendMessage("IDCHANGE", Param2);
+        //        }
 
-                LogSystemHumanMessage(string.Concat("Your name has been changed to ", NewName, "."));
-            }
-            else
-                LogSystemHumanMessage("Your name can't be blanked out!");
-        }
+        //        LogSystemHumanMessage(string.Concat("Your name has been changed to ", NewName, "."));
+        //    }
+        //    else
+        //        LogSystemHumanMessage("Your name can't be blanked out!");
+        //}
 
         public void SendMessage(string MessageHeader, string Contents)
         {
@@ -453,7 +446,7 @@ namespace JsChatterBox.Networking
                 {
                     JsEncoder.ValueBase[] Param1 = new JsEncoder.ValueBase[1];
                     Param1[0] = ResponseTable;
-                    _SocketAdapter.InputData(Param1);
+                    _SocketEncoder.InputData(Param1);
                 }
                 else
                     _MessageQueue.Add(ResponseTable);
@@ -503,12 +496,12 @@ namespace JsChatterBox.Networking
 
         // Things to manage the connection.
         private TcpSocketClient _Socket;
+        private SocketEncoderAssembly _SocketEncoder = new SocketEncoderAssembly();
         private int _ConnectionStatus = 0; // 0 = Disconnected, 1 = Connected, 2 = Connecting, 3 = Disconnecting
         private bool _GreetingSent = false;
         private bool _GreetingReceived = false;
-        private SocketEncoderAssembly _SocketAdapter;
-        private List<JsEncoder.ValueBase> _MessageQueue;
-        private List<PeerMessageDigested> _MessageOutput;
+        private List<JsEncoder.ValueBase> _MessageQueue = new List<JsEncoder.ValueBase>();
+        private List<PeerMessageDigested> _MessageOutput = new List<PeerMessageDigested>();
 
         // Timers
         private float _ConnectionTimeout = 0;
@@ -522,11 +515,6 @@ namespace JsChatterBox.Networking
             OnConnectionStatusChanged?.Invoke(this, NewStatus);
         }
         private void OutputMessage(PeerMessageDigested Message) { _MessageOutput.Add(Message); }
-        private void OnDisconnection()
-        {
-            DropConnection();
-            LogSystemHumanMessage("You've lost connection with the other peer.");
-        }
         private void LogHumanMessage(string Line) { OnHumanLogOutput?.Invoke(this, Line); }
         private void LogSystemHumanMessage(string Line) { LogHumanMessage(string.Concat("[Connection] ", Line)); }
 
@@ -544,7 +532,7 @@ namespace JsChatterBox.Networking
             }
             return r;
         }
-        public static List<PeerConnection> AcceptConnectionsFromTcpListener(PeerIdentity ThisPeerID, TcpListener Listener)
+        public static List<PeerConnection> AcceptAllConnectionsFromTcpListener(PeerIdentity ThisPeerID, TcpListener Listener)
         {
             List<PeerConnection> r = new List<PeerConnection>();
             while (Listener.Pending())
@@ -656,220 +644,215 @@ namespace JsChatterBox.Networking
         private bool _Active = false;
         private List<PeerConnection> _PendingConnections = new List<PeerConnection>();
     }
-    public delegate void OnHumanLogOutputHandler(PeerConnection Sender, string Message);
-    public delegate void OnConnectionStatusChangedHandler(PeerConnection Sender, int NewStatus);
-    public delegate void OnNewConnectionHandler(ConnectionRequestListener Sender, PeerConnection NewConnection);
-
-    // Implementations (These are shell handling systems for the main application)
-    namespace Implementations
+    public class ChatServer : IDisposable
     {
-        public class ChatServer : IDisposable
+        private sealed class ClientInfo : IDisposable
         {
-            private sealed class ClientInfo : IDisposable
+            public ChatServer ParentServer;
+            public PeerConnection c; // Connection
+            public int ID;
+
+            public override string ToString()
             {
-                public ChatServer ParentServer;
-                public PeerConnection c; // Connection
-                public int ID;
-
-                public override string ToString()
-                {
-                    return string.Concat(c.OtherPeerID.ToString(), " (", ID.ToString(), ")");
-                }
-
-                public ClientInfo(ChatServer ParentServer, PeerConnection Socket, int Id)
-                {
-                    this.ParentServer = ParentServer;
-                    c = Socket;
-                    ID = Id;
-                    MessageOutputResponderDelegate = new OnHumanLogOutputHandler(MessageOutputResponder);
-                    c.OnHumanLogOutput += MessageOutputResponderDelegate;
-                }
-                public void Dispose()
-                {
-                    if (c != null)
-                    {
-                        c.OnHumanLogOutput -= MessageOutputResponderDelegate;
-                        c.Dispose();
-                        c = null;
-                    }
-                }
-
-                private OnHumanLogOutputHandler MessageOutputResponderDelegate;
-                private void MessageOutputResponder(PeerConnection Sender, string Message)
-                {
-                    ParentServer.OutputMessageLine(string.Concat(this.ToString(), " ", Message));
-                }
+                return string.Concat(c.OtherPeerID.ToString(), " (", ID.ToString(), ")");
             }
 
-            public ChatServer(int Port)
+            public ClientInfo(ChatServer ParentServer, PeerConnection Socket, int Id)
             {
-                _Port = Port;
-                _ListenerSocket = new TcpListener(System.Net.IPAddress.Any, Port);
+                this.ParentServer = ParentServer;
+                c = Socket;
+                ID = Id;
+                MessageOutputResponderDelegate = new OnHumanLogOutputHandler(MessageOutputResponder);
+                c.OnHumanLogOutput += MessageOutputResponderDelegate;
             }
             public void Dispose()
             {
-                Stop();
-                foreach (ClientInfo item in Clients.ToArray())
-                    item.Dispose();
-                Clients.Clear();
-            }
-
-            public int Port { get { return _Port; } }
-            public bool IsActive { get { return _Active; } }
-
-            public void Start()
-            {
-                if (!_Active)
+                if (c != null)
                 {
-                    _Active = true;
-
-                    bool r = false;
-                    try
-                    {
-                        _ListenerSocket.Start();
-                        r = true;
-                    }
-                    catch (Exception e)
-                    {
-                        OutputMessageLine(string.Concat("Server: The listener socket could not be opened. Error: \"", e.Message, "\""));
-                    }
-                    finally
-                    {
-                        if (!r)
-                            Stop();
-                    }
-                }
-            }
-            public void Stop()
-            {
-                if (_Active)
-                {
-                    _Active = false;
-                    _ListenerSocket.Stop();
+                    c.OnHumanLogOutput -= MessageOutputResponderDelegate;
+                    c.Dispose();
+                    c = null;
                 }
             }
 
-            public PeerIdentity[] GetGuests()
+            private OnHumanLogOutputHandler MessageOutputResponderDelegate;
+            private void MessageOutputResponder(PeerConnection Sender, string Message)
             {
-                ClientInfo[] clients = Clients.ToArray();
-                int ClientsLength = clients.Length;
-                PeerIdentity[] r = new PeerIdentity[ClientsLength];
-                for (int i = 0; i < ClientsLength; i++)
-                {
-                    ClientInfo client = clients[i];
-                    r[i] = client.c.OtherPeerID.Value;
-                }
-                return r;
-            }
-            public string[] GetGuestList()
-            {
-                ClientInfo[] guests = Clients.ToArray();
-                int guestsL = guests.Length;
-                string[] lines = new string[guestsL];
-                for (int i = 0; i < guestsL; i++)
-                {
-                    ClientInfo guest = guests[i];
-                    lines[i] = string.Concat(guest.ToString());
-                }
-                return lines;
-            }
-            public void RunCycle(float DeltaTime)
-            {
-                if (_Active)
-                {
-                    bool HasNewGuests = false;
-                    while (_ListenerSocket.Pending())
-                    {
-                        PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener(new PeerIdentity("Old Server"), _ListenerSocket);
-                        ClientInfo NewClient = new ClientInfo(this, NewConnection, _NextGuestId);
-                        Clients.Add(NewClient);
-                        OutputMessageLine(string.Concat("A new guest has connected! It was assigned an ID of ", _NextGuestId, "."));
-
-                        _NextGuestId++;
-                        HasNewGuests = true;
-                    }
-                    //if (HasNewGuests) BroadcastClientInfo();
-                }
-                foreach (ClientInfo item in Clients.ToArray())
-                    item.c.RunCycle(DeltaTime);
-                CheckOnClients();
-            }
-
-            public event Action<string> OnLineOutput;
-
-            private int _Port;
-            private bool _Active = false;
-            private int _NextGuestId = 1;
-
-            private TcpListener _ListenerSocket;
-            private List<ClientInfo> Clients = new List<ClientInfo>();
-
-            private void OutputMessageLine(string Line) { OnLineOutput?.Invoke(Line); }
-            private void DropClient(ClientInfo client)
-            {
-                client.Dispose();
-                Clients.Remove(client);
-                //BroadcastClientInfo();
-            }
-            private void CheckOnClients()
-            {
-                foreach (ClientInfo client in Clients.ToArray())
-                    CheckOnClient(client);
-            }
-            private void CheckOnClient(ClientInfo client)
-            {
-                if (client.c.ConnectionStatus != 0)
-                {
-#if !EXPOSE_ERRORS
-                    try
-#endif
-                    {
-                        // Receive a command and send an answer.
-                        PeerMessageDigested[] output = client.c.GetMessageOutput();
-                        foreach (PeerMessageDigested m in output)
-                        {
-                            if (m.Header == "HUMANMESSAGE")
-                            {
-                                int ClientId = client.ID;
-                                string MessageText = m.contents1S;
-                                BroadcastMessage("HUMANMESSAGE", string.Format("({0}) {1}", client.ToString(), MessageText));
-                            }
-                        }
-                    }
-#if !EXPOSE_ERRORS
-                    catch (Exception e)
-                    {
-                        OutputMessageLine(string.Concat("Error: ", e.Message));
-                        DropClient(client);
-                    }
-#endif
-                }
-                else
-                {
-                    string name = client.ToString();
-                    DropClient(client);
-                    OutputMessageLine(string.Concat(name, " has disconnected from the server."));
-                }
-            }
-            
-            private void SendMessage(ClientInfo Client, string MessageHeader, string Contents) { Client.c.SendMessage(MessageHeader, Contents); }
-            private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<string> Contents) { Client.c.SendMessage(MessageHeader, Contents); }
-            private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents) { Client.c.SendMessage(MessageHeader, Contents); }
-            private void BroadcastMessage(string MessageHeader, string Contents)
-            {
-                foreach (ClientInfo item in Clients.ToArray())
-                    item.c.SendMessage(MessageHeader, Contents);
-            }
-            private void BroadcastMessage(string MessageHeader, IEnumerable<string> Contents)
-            {
-                foreach (ClientInfo item in Clients.ToArray())
-                    item.c.SendMessage(MessageHeader, Contents);
-            }
-            private void BroadcastMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents)
-            {
-                foreach (ClientInfo item in Clients.ToArray())
-                    item.c.SendMessage(MessageHeader, Contents);
+                ParentServer.OutputMessageLine(string.Concat(this.ToString(), " ", Message));
             }
         }
+
+        public ChatServer(int Port)
+        {
+            _Port = Port;
+            _ListenerSocket = new TcpListener(System.Net.IPAddress.Any, Port);
+        }
+        public void Dispose()
+        {
+            Stop();
+            foreach (ClientInfo item in _Clients.ToArray())
+                item.Dispose();
+            _Clients.Clear();
+        }
+
+        public int Port { get { return _Port; } }
+        public bool IsActive { get { return _Active; } }
+
+        public void Start()
+        {
+            if (!_Active)
+            {
+                _Active = true;
+
+                bool r = false;
+                try
+                {
+                    _ListenerSocket.Start();
+                    r = true;
+                }
+                catch (Exception e)
+                {
+                    OutputMessageLine(string.Concat("Server: The listener socket could not be opened. Error: \"", e.Message, "\""));
+                }
+                finally
+                {
+                    if (!r)
+                        Stop();
+                }
+            }
+        }
+        public void Stop()
+        {
+            if (_Active)
+            {
+                _Active = false;
+                _ListenerSocket.Stop();
+            }
+        }
+
+        public PeerIdentity[] GetGuests()
+        {
+            ClientInfo[] clients = _Clients.ToArray();
+            int ClientsLength = clients.Length;
+            PeerIdentity[] r = new PeerIdentity[ClientsLength];
+            for (int i = 0; i < ClientsLength; i++)
+            {
+                ClientInfo client = clients[i];
+                r[i] = client.c.OtherPeerID.Value;
+            }
+            return r;
+        }
+        public string[] GetGuestList()
+        {
+            ClientInfo[] guests = _Clients.ToArray();
+            int guestsL = guests.Length;
+            string[] lines = new string[guestsL];
+            for (int i = 0; i < guestsL; i++)
+            {
+                ClientInfo guest = guests[i];
+                lines[i] = string.Concat(guest.ToString());
+            }
+            return lines;
+        }
+        public void RunCycle(float DeltaTime)
+        {
+            if (_Active)
+            {
+                bool HasNewGuests = false;
+                while (_ListenerSocket.Pending())
+                {
+                    PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener(new PeerIdentity("Old Server"), _ListenerSocket);
+                    ClientInfo NewClient = new ClientInfo(this, NewConnection, _NextGuestId);
+                    _Clients.Add(NewClient);
+                    OutputMessageLine(string.Concat("A new guest has connected! It was assigned an ID of ", _NextGuestId, "."));
+
+                    _NextGuestId++;
+                    HasNewGuests = true;
+                }
+                //if (HasNewGuests) BroadcastClientInfo();
+            }
+            foreach (ClientInfo item in _Clients.ToArray())
+                item.c.RunCycle(DeltaTime);
+            CheckOnClients();
+        }
+
+        public event Action<string> OnLineOutput;
+
+        private int _Port;
+        private bool _Active = false;
+        private int _NextGuestId = 1;
+
+        private TcpListener _ListenerSocket;
+        private List<ClientInfo> _Clients = new List<ClientInfo>();
+
+        private void OutputMessageLine(string Line) { OnLineOutput?.Invoke(Line); }
+        private void DropClient(ClientInfo client)
+        {
+            client.Dispose();
+            _Clients.Remove(client);
+            //BroadcastClientInfo();
+        }
+        private void CheckOnClients()
+        {
+            foreach (ClientInfo client in _Clients.ToArray())
+                CheckOnClient(client);
+        }
+        private void CheckOnClient(ClientInfo client)
+        {
+            if (client.c.ConnectionStatus != 0)
+            {
+#if !EXPOSE_ERRORS
+                try
+#endif
+                {
+                    // Receive a command and send an answer.
+                    PeerMessageDigested[] output = client.c.GetMessageOutput();
+                    foreach (PeerMessageDigested m in output)
+                    {
+                        if (m.Header == "HUMANMESSAGE")
+                        {
+                            int ClientId = client.ID;
+                            string MessageText = m.contents1S;
+                            BroadcastMessage("HUMANMESSAGE", string.Format("({0}) {1}", client.ToString(), MessageText));
+                        }
+                    }
+                }
+#if !EXPOSE_ERRORS
+                catch (Exception e)
+                {
+                    OutputMessageLine(string.Concat("Error: ", e.Message));
+                    DropClient(client);
+                }
+#endif
+            }
+            else
+            {
+                string name = client.ToString();
+                DropClient(client);
+                OutputMessageLine(string.Concat(name, " has disconnected from the server."));
+            }
+        }
+
+        private void SendMessage(ClientInfo Client, string MessageHeader, string Contents) { Client.c.SendMessage(MessageHeader, Contents); }
+        private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<string> Contents) { Client.c.SendMessage(MessageHeader, Contents); }
+        private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents) { Client.c.SendMessage(MessageHeader, Contents); }
+        private void BroadcastMessage(string MessageHeader, string Contents)
+        {
+            foreach (ClientInfo item in _Clients.ToArray())
+                item.c.SendMessage(MessageHeader, Contents);
+        }
+        private void BroadcastMessage(string MessageHeader, IEnumerable<string> Contents)
+        {
+            foreach (ClientInfo item in _Clients.ToArray())
+                item.c.SendMessage(MessageHeader, Contents);
+        }
+        private void BroadcastMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents)
+        {
+            foreach (ClientInfo item in _Clients.ToArray())
+                item.c.SendMessage(MessageHeader, Contents);
+        }
     }
+    public delegate void OnHumanLogOutputHandler(PeerConnection Sender, string Message);
+    public delegate void OnConnectionStatusChangedHandler(PeerConnection Sender, int NewStatus);
+    public delegate void OnNewConnectionHandler(ConnectionRequestListener Sender, PeerConnection NewConnection);
 }

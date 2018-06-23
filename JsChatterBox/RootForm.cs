@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using JsChatterBox.Networking;
-using JsChatterBox.Networking.Implementations;
 
 namespace JsChatterBox
 {
@@ -46,7 +45,7 @@ namespace JsChatterBox
             {
                 if (HostName != "")
                 {
-                    Program.OpenChatConnection(HostName, Port.Value);
+                    Program.OpenChatWindow(HostName, Port.Value);
                     UpdateHostListControl();
                 }
                 else

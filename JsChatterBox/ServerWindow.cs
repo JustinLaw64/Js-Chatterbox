@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using JsChatterBox.Networking;
-using JsChatterBox.Networking.Implementations;
 
 namespace JsChatterBox
 {
@@ -63,7 +62,7 @@ namespace JsChatterBox
 
         private void ConnectLocalButton_Click(object sender, EventArgs e)
         {
-            Program.OpenChatConnection("127.0.0.1", _ServerInstance.Port);
+            Program.OpenChatWindow("127.0.0.1", _ServerInstance.Port);
         }
     }
 }
