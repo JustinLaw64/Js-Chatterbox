@@ -27,7 +27,7 @@ namespace JsChatterBox
             FormUpdateTimer.Start();
             UpdateGeneralControls();
         }
-        public ClientWindow() : this(new PeerConnection(new PeerIdentity(0, Program.DataManager.UserName)))
+        public ClientWindow() : this(new PeerConnection(new PeerIdentity(Program.DataManager.UserName)))
         {
             OwnsConnection = true;
         }
@@ -56,26 +56,12 @@ namespace JsChatterBox
             }
         }
         
-        private void UpdatePeopleList()
-        {
-            Dictionary<int, PeerIdentity> people = _c.GetGuestList();
-            int peopleLength = people.Count;
-            String[] NewLines = new String[peopleLength];
-            int i = -1;
-            foreach (var pair in people)
-            {
-                i++;
-                NewLines[i] = String.Concat(pair.Value.Name, " (", pair.Key, ")");
-            }
-            PeopleConnectedListBox.Lines = NewLines;
-        }
         private void UpdateGeneralControls()
         {
             PeerConnection c = _c;
             bool connected = c.IsConnected;
 
             SendMesageButton.Enabled = connected;
-            MainSplitContainer.Panel1Collapsed = !(c.OtherPeerID.HasValue ? (c.OtherPeerID.Value.PeerType == 1) : false);
 
             String NewTitleBarName = String.Concat(
                 _TitleBarBaseName, " - ", 
@@ -95,8 +81,7 @@ namespace JsChatterBox
         private void FormUpdateTimer_Tick(object sender, EventArgs e)
         {
             _c.RunCycle(FormUpdateTimer.Interval / 1000f);
-
-            UpdatePeopleList();
+            
             UpdateGeneralControls();
         }
         private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)

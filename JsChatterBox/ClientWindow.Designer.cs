@@ -30,9 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ClientWindow));
-            this.MainSplitContainer = new System.Windows.Forms.SplitContainer();
-            this.label1 = new System.Windows.Forms.Label();
-            this.PeopleConnectedListBox = new System.Windows.Forms.TextBox();
             this.OutputBoxLabel = new System.Windows.Forms.Label();
             this.MessageTextBox = new System.Windows.Forms.TextBox();
             this.SendMesageButton = new System.Windows.Forms.Button();
@@ -41,65 +38,13 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ClearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)(this.MainSplitContainer)).BeginInit();
-            this.MainSplitContainer.Panel1.SuspendLayout();
-            this.MainSplitContainer.Panel2.SuspendLayout();
-            this.MainSplitContainer.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // MainSplitContainer
-            // 
-            this.MainSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.MainSplitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.MainSplitContainer.Location = new System.Drawing.Point(12, 27);
-            this.MainSplitContainer.Name = "MainSplitContainer";
-            // 
-            // MainSplitContainer.Panel1
-            // 
-            this.MainSplitContainer.Panel1.Controls.Add(this.label1);
-            this.MainSplitContainer.Panel1.Controls.Add(this.PeopleConnectedListBox);
-            this.MainSplitContainer.Panel1MinSize = 150;
-            // 
-            // MainSplitContainer.Panel2
-            // 
-            this.MainSplitContainer.Panel2.Controls.Add(this.OutputBoxLabel);
-            this.MainSplitContainer.Panel2.Controls.Add(this.MessageTextBox);
-            this.MainSplitContainer.Panel2.Controls.Add(this.SendMesageButton);
-            this.MainSplitContainer.Panel2.Controls.Add(this.ChatLogTextBox);
-            this.MainSplitContainer.Panel2MinSize = 250;
-            this.MainSplitContainer.Size = new System.Drawing.Size(440, 242);
-            this.MainSplitContainer.SplitterDistance = 150;
-            this.MainSplitContainer.TabIndex = 1;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(92, 13);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "People on Server:";
-            // 
-            // PeopleConnectedListBox
-            // 
-            this.PeopleConnectedListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PeopleConnectedListBox.Location = new System.Drawing.Point(3, 16);
-            this.PeopleConnectedListBox.Multiline = true;
-            this.PeopleConnectedListBox.Name = "PeopleConnectedListBox";
-            this.PeopleConnectedListBox.ReadOnly = true;
-            this.PeopleConnectedListBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.PeopleConnectedListBox.Size = new System.Drawing.Size(144, 223);
-            this.PeopleConnectedListBox.TabIndex = 3;
             // 
             // OutputBoxLabel
             // 
             this.OutputBoxLabel.AutoSize = true;
-            this.OutputBoxLabel.Location = new System.Drawing.Point(0, 0);
+            this.OutputBoxLabel.Location = new System.Drawing.Point(9, 24);
             this.OutputBoxLabel.Name = "OutputBoxLabel";
             this.OutputBoxLabel.Size = new System.Drawing.Size(28, 13);
             this.OutputBoxLabel.TabIndex = 4;
@@ -110,16 +55,16 @@
             this.MessageTextBox.AcceptsReturn = true;
             this.MessageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.MessageTextBox.Location = new System.Drawing.Point(3, 218);
+            this.MessageTextBox.Location = new System.Drawing.Point(12, 249);
             this.MessageTextBox.Name = "MessageTextBox";
-            this.MessageTextBox.Size = new System.Drawing.Size(210, 20);
+            this.MessageTextBox.Size = new System.Drawing.Size(370, 20);
             this.MessageTextBox.TabIndex = 6;
             this.MessageTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTextBox_KeyDown);
             // 
             // SendMesageButton
             // 
             this.SendMesageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.SendMesageButton.Location = new System.Drawing.Point(219, 216);
+            this.SendMesageButton.Location = new System.Drawing.Point(388, 247);
             this.SendMesageButton.Name = "SendMesageButton";
             this.SendMesageButton.Size = new System.Drawing.Size(64, 23);
             this.SendMesageButton.TabIndex = 7;
@@ -132,12 +77,12 @@
             this.ChatLogTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ChatLogTextBox.Location = new System.Drawing.Point(3, 16);
+            this.ChatLogTextBox.Location = new System.Drawing.Point(12, 40);
             this.ChatLogTextBox.Multiline = true;
             this.ChatLogTextBox.Name = "ChatLogTextBox";
             this.ChatLogTextBox.ReadOnly = true;
             this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatLogTextBox.Size = new System.Drawing.Size(280, 196);
+            this.ChatLogTextBox.Size = new System.Drawing.Size(440, 201);
             this.ChatLogTextBox.TabIndex = 5;
             // 
             // FormUpdateTimer
@@ -175,7 +120,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(464, 281);
-            this.Controls.Add(this.MainSplitContainer);
+            this.Controls.Add(this.SendMesageButton);
+            this.Controls.Add(this.MessageTextBox);
+            this.Controls.Add(this.OutputBoxLabel);
+            this.Controls.Add(this.ChatLogTextBox);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
@@ -183,12 +131,6 @@
             this.Name = "ClientWindow";
             this.Text = "Js ChatterBox";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatForm_FormClosed);
-            this.MainSplitContainer.Panel1.ResumeLayout(false);
-            this.MainSplitContainer.Panel1.PerformLayout();
-            this.MainSplitContainer.Panel2.ResumeLayout(false);
-            this.MainSplitContainer.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.MainSplitContainer)).EndInit();
-            this.MainSplitContainer.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -197,15 +139,11 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.SplitContainer MainSplitContainer;
         private System.Windows.Forms.TextBox ChatLogTextBox;
-        private System.Windows.Forms.TextBox PeopleConnectedListBox;
         private System.Windows.Forms.TextBox MessageTextBox;
         private System.Windows.Forms.Button SendMesageButton;
         private System.Windows.Forms.Timer FormUpdateTimer;
         private System.Windows.Forms.Label OutputBoxLabel;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem ClearLogMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;

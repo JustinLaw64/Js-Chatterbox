@@ -164,7 +164,7 @@ namespace JsChatterBox
             _IsLoaded = true;
             return r;
         }
-        public PeerIdentity GetPeerIdentity() { return new PeerIdentity(0, UserName); }
+        public PeerIdentity GetPeerIdentity() { return new PeerIdentity(UserName); }
 
         private bool _IsLoaded = false;
 
