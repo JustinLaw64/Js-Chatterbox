@@ -311,12 +311,17 @@ namespace JsEncoder
         public static string EncodeFloat(JsEncoder_Type_Float Value) { return Value.ToString(); }
         public static string EncodeString(string Value)
         {
-            string Result = Value;
-            Result = Result.Replace("\\", "\\\\");
-            Result = Result.Replace("|", "\\|");
-            Result = Result.Replace("\"", "\\\"");
-            Result = string.Concat("\"", Result, "\"");
-            return Result;
+            string r = Value;
+            if (r != null)
+            {
+                r = r.Replace("\\", "\\\\");
+                r = r.Replace("|", "\\|");
+                r = r.Replace("\"", "\\\"");
+                r = string.Concat("\"", r, "\"");
+            }
+            else
+                r = EncodeNull();
+            return r;
         }
         public static string EncodeTable(TableValue Value)
         {
