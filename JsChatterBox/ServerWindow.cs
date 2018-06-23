@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using JsChatterBoxNetworking;
-using JsChatterBoxNetworking.Implementations;
+using JsChatterBox.Networking;
+using JsChatterBox.Networking.Implementations;
 
 namespace JsChatterBox
 {

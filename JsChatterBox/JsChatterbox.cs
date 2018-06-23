@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TcpSocketClient = System.Net.Sockets.TcpClient;
 
-namespace JsChatterBoxNetworking
+namespace JsChatterBox.Networking
 {
     public static class NetworkConfig
     {
@@ -91,15 +91,10 @@ namespace JsChatterBoxNetworking
     public struct PeerMessageDigested
     {
         public JsEncoder.TableValue Table;
-
-        // Header
+        
         public String Header;
-
-        // First two values
         public JsEncoder.ValueBase contents1V;
         public JsEncoder.ValueBase contents2V;
-
-        // Converted to Strings
         public String contents1S;
         public String contents2S;
 
@@ -113,7 +108,7 @@ namespace JsChatterBoxNetworking
             contents1V = Table.Get(2);
             contents2V = Table.Get(3);
 
-            // Converted to Strings
+            // Convert them to Strings
             JsEncoder.StringValue contents1SV = contents1V as JsEncoder.StringValue;
             JsEncoder.StringValue contents2SV = contents2V as JsEncoder.StringValue;
             contents1S = contents1SV != null ? contents1SV.GetValue() : null;
@@ -154,7 +149,7 @@ namespace JsChatterBoxNetworking
         public PeerIdentity? OtherPeerID { get { return _OtherPeerID; } }
         public String OtherPeerDisplayName { get { return (_OtherPeerID.HasValue ? _OtherPeerID.Value.Name : "Unknown"); } }
         public TcpSocketClient Socket { get { return _Socket; } }
-        public bool OwnsSocket = false; // The socket will also be disposed if this is true.
+        public bool OwnsSocket = false; // The socket will also be disposed when disposing this object while this is true.
         public bool PrintPeerMessages = true; // The messages that the other peer sends will be printed out
         public bool AutoSendGreeting = true; // If false, then SendGreeting must be called manually before the connection can complete.
         public int ConnectionStatus { get { return _ConnectionStatus; } }
@@ -558,109 +553,109 @@ namespace JsChatterBoxNetworking
         }
     };
     public class ConnectionRequestListener : IDisposable
+    {
+        public ConnectionRequestListener(PeerIdentity ID, int Port)
         {
-            public ConnectionRequestListener(PeerIdentity ID, int Port)
-            {
-                LocalIdentity = ID;
-                _Port = Port;
-            }
-            public void Dispose()
+            LocalIdentity = ID;
+            _Port = Port;
+        }
+        public void Dispose()
+        {
+            Stop();
+
+            foreach (PeerConnection item in _PendingConnections.ToArray())
+                item.Dispose();
+            _PendingConnections.Clear();
+        }
+
+        public PeerIdentity LocalIdentity;
+        public bool IsActive { get { return _Active; } }
+        public int Port
+        {
+            get { return _Port; }
+            set
             {
                 Stop();
+                _Port = value;
+            }
+        }
 
-                foreach (PeerConnection item in _PendingConnections.ToArray())
+        public void RunCycle(float DeltaTime)
+        {
+            foreach (PeerConnection item in _PendingConnections.ToArray())
+            {
+                item.RunCycle(DeltaTime);
+
+                // Clean up the connections that finished being rejected or was lost.
+                if (item.ConnectionStatus == 0)
+                {
+                    _PendingConnections.Remove(item);
                     item.Dispose();
-                _PendingConnections.Clear();
+                }
             }
+            if (_Active)
+            {
+                while (_Listener.Pending())
+                {
+                    PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener(LocalIdentity, _Listener);
+                    NewConnection.AutoSendGreeting = false; // Specifically for enabling user request scrutiny.
+                    _PendingConnections.Add(NewConnection);
+                }
+            }
+        }
+        public void Start()
+        {
+            if (!_Active)
+            {
+                _Active = true;
+                bool r = false;
+                try
+                {
+                    _Listener = new TcpListener(System.Net.IPAddress.Any, _Port);
+                    _Listener.Start();
+                    r = true;
+                }
+                finally
+                {
+                    if (!r)
+                        Stop();
+                }
+            }
+        }
+        public void Stop()
+        {
+            if (_Active)
+            {
+                _Active = false;
+                _Listener.Stop();
+                _Listener = null;
+            }
+        }
+        public PeerConnection[] GetPendingRequests() { return _PendingConnections.ToArray(); }
+        public bool RejectConnection(PeerConnection Connection)
+        {
+            bool r = _PendingConnections.Remove(Connection);
+            if (r)
+                Connection.BeginDisconnect(0, true);
+            return r;
+        }
+        public bool AcceptConnection(PeerConnection Connection)
+        {
+            bool r = _PendingConnections.Remove(Connection);
+            if (r)
+            {
+                Connection.AutoSendGreeting = true;
+                Connection.SendGreeting();
+            }
+            return r;
+        }
 
-            public PeerIdentity LocalIdentity;
-            public bool IsActive { get { return _Active; } }
-            public int Port
-            {
-                get { return _Port; }
-                set
-                {
-                    Stop();
-                    _Port = value;
-                }
-            }
+        private int _Port;
 
-            public void RunCycle(float DeltaTime)
-            {
-                foreach (PeerConnection item in _PendingConnections.ToArray())
-                {
-                    item.RunCycle(DeltaTime);
-
-                    // Clean up the connections that finished being rejected or was lost.
-                    if (item.ConnectionStatus == 0)
-                    {
-                        _PendingConnections.Remove(item);
-                        item.Dispose();
-                    }
-                }
-                if (_Active)
-                {
-                    while (_Listener.Pending())
-                    {
-                        PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener(LocalIdentity, _Listener);
-                        NewConnection.AutoSendGreeting = false; // Specifically for enabling user request scrutiny.
-                        _PendingConnections.Add(NewConnection);
-                    }
-                }
-            }
-            public void Start()
-            {
-                if (!_Active)
-                {
-                    _Active = true;
-                    bool r = false;
-                    try
-                    {
-                        _Listener = new TcpListener(System.Net.IPAddress.Any, _Port);
-                        _Listener.Start();
-                        r = true;
-                    }
-                    finally
-                    {
-                        if (!r)
-                            Stop();
-                    }
-                }
-            }
-            public void Stop()
-            {
-                if (_Active)
-                {
-                    _Active = false;
-                    _Listener.Stop();
-                    _Listener = null;
-                }
-            }
-            public PeerConnection[] GetPendingRequests() { return _PendingConnections.ToArray(); }
-            public bool RejectConnection(PeerConnection Connection)
-            {
-                bool r = _PendingConnections.Remove(Connection);
-                if (r)
-                    Connection.BeginDisconnect(0, true);
-                return r;
-            }
-            public bool AcceptConnection(PeerConnection Connection)
-            {
-                bool r = _PendingConnections.Remove(Connection);
-                if (r)
-                {
-                    Connection.AutoSendGreeting = true;
-                    Connection.SendGreeting();
-                }
-                return r;
-            }
-
-            private int _Port;
-
-            private TcpListener _Listener;
-            private bool _Active = false;
-            private List<PeerConnection> _PendingConnections = new List<PeerConnection>();
-        };
+        private TcpListener _Listener;
+        private bool _Active = false;
+        private List<PeerConnection> _PendingConnections = new List<PeerConnection>();
+    }
     public delegate void OnHumanLogOutputHandler(PeerConnection Sender, string Message);
     public delegate void OnConnectionStatusChangedHandler(PeerConnection Sender, int NewStatus);
     public delegate void OnNewConnectionHandler(ConnectionRequestListener Sender, PeerConnection NewConnection);
@@ -780,42 +775,36 @@ namespace JsChatterBoxNetworking
             }
             public void RunCycle(float DeltaTime)
             {
-                AcceptAllClients();
-                foreach (ClientInfo item in Clients.ToArray())
-                    item.c.RunCycle(DeltaTime);
-                CheckOnClients();
-                //BroadcastClientInfo();
-            }
-
-            public event Action<string> OnLineOutput;
-
-            private int _Port;
-            private bool _Active = false;
-            private int NextGuestId = 1;
-
-            private TcpListener _ListenerSocket;
-            private List<ClientInfo> Clients = new List<ClientInfo>();
-
-            private void OutputMessageLine(string Line) { OnLineOutput?.Invoke(Line); }
-            private void AcceptAllClients()
-            {
                 if (_Active)
                 {
                     bool HasNewGuests = false;
                     while (_ListenerSocket.Pending())
                     {
                         PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener(new PeerIdentity("Old Server"), _ListenerSocket);
-                        NewConnection.PrintPeerMessages = false;
-                        ClientInfo NewClient = new ClientInfo(this, NewConnection, NextGuestId);
+                        ClientInfo NewClient = new ClientInfo(this, NewConnection, _NextGuestId);
                         Clients.Add(NewClient);
-                        OutputMessageLine(string.Concat("A new guest has connected! It was assigned an ID of ", NextGuestId, "."));
+                        OutputMessageLine(string.Concat("A new guest has connected! It was assigned an ID of ", _NextGuestId, "."));
 
-                        NextGuestId++;
+                        _NextGuestId++;
                         HasNewGuests = true;
                     }
                     //if (HasNewGuests) BroadcastClientInfo();
                 }
+                foreach (ClientInfo item in Clients.ToArray())
+                    item.c.RunCycle(DeltaTime);
+                CheckOnClients();
             }
+
+            public event Action<string> OnLineOutput;
+
+            private int _Port;
+            private bool _Active = false;
+            private int _NextGuestId = 1;
+
+            private TcpListener _ListenerSocket;
+            private List<ClientInfo> Clients = new List<ClientInfo>();
+
+            private void OutputMessageLine(string Line) { OnLineOutput?.Invoke(Line); }
             private void DropClient(ClientInfo client)
             {
                 client.Dispose();
@@ -843,9 +832,7 @@ namespace JsChatterBoxNetworking
                             {
                                 int ClientId = client.ID;
                                 string MessageText = m.contents1S;
-
-                                OutputMessageLine(string.Concat(client.ToString(), " says: ", MessageText));
-                                BroadcastMessage("HUMANMESSAGE", string.Format("({0}): {1}", client.ToString(), MessageText));
+                                BroadcastMessage("HUMANMESSAGE", string.Format("({0}) {1}", client.ToString(), MessageText));
                             }
                         }
                     }

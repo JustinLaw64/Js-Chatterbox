@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using FileIO = System.IO.File;
 using DirectoryIO = System.IO.Directory;
-using JsChatterBoxNetworking;
-using JsChatterBoxNetworking.Implementations;
+using JsChatterBox.Networking;
+using JsChatterBox.Networking.Implementations;
 
 namespace JsChatterBox
 {
