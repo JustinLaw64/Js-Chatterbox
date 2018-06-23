@@ -130,7 +130,7 @@ namespace JsChatterBox
                 RequestAnswerer_SetState(false, true);
                 RequestAnswerer_Listener.Port = NewPort;
             }
-            RequestAnswerer_Listener.LocalIdentity = Program.DataManager.GetPeerIdentity();
+            RequestAnswerer_Listener.LocalIdentity = Program.DataManager.UserName;
         }
 
         private void FavoriteToggleButton_Click(object sender, EventArgs e)
@@ -176,7 +176,7 @@ namespace JsChatterBox
 
         private void RequestAnswerer_Constructor()
         {
-            RequestAnswerer_Listener = new ConnectionRequestListener(Program.DataManager.GetPeerIdentity(), Program.DataManager.WorkingPort);
+            RequestAnswerer_Listener = new ConnectionRequestListener(Program.DataManager.UserName, Program.DataManager.WorkingPort);
 
             RequestAnswerer_UpdateControls();
         }

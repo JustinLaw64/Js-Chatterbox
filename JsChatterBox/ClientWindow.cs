@@ -26,10 +26,7 @@ namespace JsChatterBox
             FormUpdateTimer.Start();
             UpdateGeneralControls();
         }
-        public ClientWindow() : this(new PeerConnection(new PeerIdentity(Program.DataManager.UserName)))
-        {
-            OwnsConnection = true;
-        }
+        public ClientWindow() : this(new PeerConnection(Program.DataManager.UserName)) { OwnsConnection = true; }
         public ClientWindow(String Hostname, int Port) : this()
         {
             _c.BeginConnect(Hostname, Port);
