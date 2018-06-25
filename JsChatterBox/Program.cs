@@ -13,21 +13,21 @@ namespace JsChatterBox
     {
         public static PersistentDataManager DataManager = null;
 
-        public static ClientWindow OpenChatConnection(PeerConnection ExistingConnection)
+        public static ChatWindow OpenChatConnection(PeerConnection ExistingConnection)
         {
-            ClientWindow NewWindow = new ClientWindow(ExistingConnection);
+            ChatWindow NewWindow = new ChatWindow(ExistingConnection);
             NewWindow.OwnsConnection = true;
             NewWindow.Show();
 
             return NewWindow;
         }
-        public static ClientWindow OpenChatWindow(String HostName, int Port)
+        public static ChatWindow OpenChatWindow(String HostName, int Port)
         {
             HostInformation NewInfo = new HostInformation(HostName, Port);
             DataManager.HostList.RecentHosts.Remove(NewInfo);
             DataManager.HostList.RecentHosts.Add(NewInfo);
 
-            ClientWindow NewWindow = new ClientWindow(HostName, Port);
+            ChatWindow NewWindow = new ChatWindow(HostName, Port);
             NewWindow.Show();
 
             return NewWindow;

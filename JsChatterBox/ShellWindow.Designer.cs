@@ -1,6 +1,6 @@
 ﻿namespace JsChatterBox
 {
-    partial class ClientWindow
+    partial class ShellWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ClientWindow));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ShellWindow));
             this.OutputBoxLabel = new System.Windows.Forms.Label();
             this.MessageTextBox = new System.Windows.Forms.TextBox();
             this.SendMesageButton = new System.Windows.Forms.Button();
@@ -38,7 +38,6 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ClearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -58,18 +57,18 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MessageTextBox.Location = new System.Drawing.Point(12, 249);
             this.MessageTextBox.Name = "MessageTextBox";
-            this.MessageTextBox.Size = new System.Drawing.Size(370, 20);
+            this.MessageTextBox.Size = new System.Drawing.Size(404, 20);
             this.MessageTextBox.TabIndex = 6;
             this.MessageTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTextBox_KeyDown);
             // 
             // SendMesageButton
             // 
             this.SendMesageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.SendMesageButton.Location = new System.Drawing.Point(388, 247);
+            this.SendMesageButton.Location = new System.Drawing.Point(422, 247);
             this.SendMesageButton.Name = "SendMesageButton";
-            this.SendMesageButton.Size = new System.Drawing.Size(64, 23);
+            this.SendMesageButton.Size = new System.Drawing.Size(30, 23);
             this.SendMesageButton.TabIndex = 7;
-            this.SendMesageButton.Text = "Send";
+            this.SendMesageButton.Text = ">";
             this.SendMesageButton.UseVisualStyleBackColor = true;
             this.SendMesageButton.Click += new System.EventHandler(this.SendMesageButton_Click);
             // 
@@ -95,7 +94,6 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ClearLogMenuItem,
-            this.disconnectToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -117,14 +115,7 @@
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.HelpAboutMenuItem_Click);
             // 
-            // disconnectToolStripMenuItem
-            // 
-            this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
-            this.disconnectToolStripMenuItem.Size = new System.Drawing.Size(78, 20);
-            this.disconnectToolStripMenuItem.Text = "&Disconnect";
-            this.disconnectToolStripMenuItem.Click += new System.EventHandler(this.DisconnectMenuItem_Click);
-            // 
-            // ClientWindow
+            // ShellWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -137,7 +128,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(480, 320);
-            this.Name = "ClientWindow";
+            this.Name = "ShellWindow";
             this.Text = "Js ChatterBox";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatForm_FormClosed);
             this.menuStrip1.ResumeLayout(false);
@@ -156,7 +147,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem ClearLogMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem disconnectToolStripMenuItem;
     }
 }
 

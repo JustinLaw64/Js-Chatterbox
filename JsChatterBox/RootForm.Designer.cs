@@ -50,6 +50,7 @@
             this.RequestAnswerer_AnswerButton = new System.Windows.Forms.Button();
             this.RequestAnswerer_ListBox = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.openShellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -62,6 +63,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.createServerToolStripMenuItem,
+            this.openShellToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -267,6 +269,13 @@
             this.label2.TabIndex = 7;
             this.label2.Text = "Incoming Chat Requests";
             // 
+            // openShellToolStripMenuItem
+            // 
+            this.openShellToolStripMenuItem.Name = "openShellToolStripMenuItem";
+            this.openShellToolStripMenuItem.Size = new System.Drawing.Size(76, 20);
+            this.openShellToolStripMenuItem.Text = "Open Shell";
+            this.openShellToolStripMenuItem.Click += new System.EventHandler(this.OpenShellMenuItem_Click);
+            // 
             // RootForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -316,5 +325,6 @@
         private System.Windows.Forms.CheckBox RequestAnswerer_ListenCheckBox;
         private System.Windows.Forms.ToolStripMenuItem configurationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createServerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openShellToolStripMenuItem;
     }
 }

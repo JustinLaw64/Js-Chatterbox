@@ -11,23 +11,23 @@ using JsChatterBox.Networking;
 
 namespace JsChatterBox
 {
-    public partial class ClientWindow : Form
+    public partial class ChatWindow : Form
     {
         public PeerConnection Connection { get { return _c; } }
         public bool OwnsConnection = false; // Can I automatically dispose the connection?
 
-        public ClientWindow(PeerConnection Connection)
+        public ChatWindow(PeerConnection Connection)
         {
             InitializeComponent();
 
             _TitleBarBaseName = this.Text;
             _c = Connection;
-            _c.OnHumanLogOutput += LogMessage;
+            _c.OnLogOutput += LogMessage;
             FormUpdateTimer.Start();
             UpdateGeneralControls();
         }
-        public ClientWindow() : this(new PeerConnection(Program.DataManager.UserName)) { OwnsConnection = true; }
-        public ClientWindow(String Hostname, int Port) : this()
+        public ChatWindow() : this(new PeerConnection(Program.DataManager.UserName)) { OwnsConnection = true; }
+        public ChatWindow(String Hostname, int Port) : this()
         {
             _c.BeginConnect(Hostname, Port);
         }
@@ -83,7 +83,7 @@ namespace JsChatterBox
         }
         private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            _c.OnHumanLogOutput -= LogMessage;
+            _c.OnLogOutput -= LogMessage;
             if (OwnsConnection)
                 _c.Dispose();
             _c = null;

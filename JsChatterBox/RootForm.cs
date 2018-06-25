@@ -54,11 +54,7 @@ namespace JsChatterBox
             else
                 System.Windows.Forms.MessageBox.Show(this, "The port field is not a number. It also doesn't accept decimals. Use only numbers!", "Error");
         }
-        private void CreateServerCommand()
-        {
-            ServerWindow NewWindow = new ServerWindow(Program.DataManager.WorkingPort);
-            NewWindow.Show();
-        }
+        private void CreateServerCommand() { (new ServerWindow(Program.DataManager.WorkingPort)).Show(); }
         private void UpdateHostListControl()
         {
             ListBox.ObjectCollection list = HostSelectionList.Items;
@@ -79,11 +75,7 @@ namespace JsChatterBox
             FavoriteToggleButton.Enabled = IsValid;
             FavoriteToggleButton.Text = (IsFavorited ? "Unf&avorite" : "Favorite");
         }
-        private int? PortBoxToNumber()
-        {
-            int r;
-            return (Int32.TryParse(HostPortTextBox.Text, out r) ? (int?)r : null);
-        }
+        private int? PortBoxToNumber() { return (Int32.TryParse(HostPortTextBox.Text, out int r) ? (int?)r : null); }
         private bool HostParamsValid()
         {
             String HostName = HostNameTextBox.Text;
@@ -116,6 +108,7 @@ namespace JsChatterBox
         }
         private void ExitMenuItem_Click(object sender, EventArgs e) { this.Close(); }
         private void CreateServerMenuItem_Click(object sender, EventArgs e) { CreateServerCommand(); }
+        private void OpenShellMenuItem_Click(object sender, EventArgs e) { (new ShellWindow()).Show(); }
         private void HelpAboutMenuItem_Click(object sender, EventArgs e)
         {
             AboutBox NewWindow = new AboutBox();
