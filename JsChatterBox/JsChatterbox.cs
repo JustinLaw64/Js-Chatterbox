@@ -132,47 +132,6 @@ namespace JsChatterBox.Networking
     }
     public class PeerConnection : IDisposable, ITextOutputLogger
     {
-        private class SocketEncoderAssembly
-        {
-            public TcpClient Socket;
-
-            public void SendInput(IEnumerable<JsEncoder.ValueBase> Data)
-            {
-                foreach (JsEncoder.ValueBase item in Data)
-                    _Encoder.InputValue(item);
-                string EncodedData = _Encoder.PopOutput();
-                char[] EncodedChars = EncodedData.ToCharArray();
-                byte[] EncodedBytes = _EncodingFormat.GetBytes(EncodedChars);
-                InputBytes(EncodedBytes);
-            }
-            public JsEncoder.ValueBase[] ReceiveOutput()
-            {
-                byte[] EncodedBytes = ReceiveOutputBytes();
-                char[] EncodedChars = _EncodingFormat.GetChars(EncodedBytes);
-                string EncodedData = new string(EncodedChars);
-                _Decoder.InputValue(EncodedData);
-                _Decoder.RunParser();
-                return _Decoder.PopOutput();
-            }
-
-            public SocketEncoderAssembly(TcpClient Socket) { this.Socket = Socket; }
-            public SocketEncoderAssembly() : this(null) { }
-
-            private System.Text.Encoding _EncodingFormat = System.Text.Encoding.Unicode;
-            private JsEncoder.EncoderStream _Encoder = new JsEncoder.EncoderStream();
-            private JsEncoder.DecoderStream _Decoder = new JsEncoder.DecoderStream();
-
-            private void InputBytes(System.Byte[] input) { Socket.Client.Send(input); }
-            private System.Byte[] ReceiveOutputBytes()
-            {
-                int NumberOfBytes = Socket.Available;
-                byte[] EncodedBytes = new byte[NumberOfBytes];
-                if (NumberOfBytes > 0)
-                    Socket.Client.Receive(EncodedBytes);
-                return EncodedBytes;
-            }
-        }
-
         // Properties
         public string ThisPeerID { get { return _ThisPeerID; } }
         public string OtherPeerID { get { return _OtherPeerID; } }
@@ -182,8 +141,7 @@ namespace JsChatterBox.Networking
         public bool IsConnected { get { return (_ConnectionStatus == 1); } }
         public bool GreetingSent { get { return _GreetingSent; } }
         public bool GreetingReceived { get { return _GreetingReceived; } }
-        public bool OwnsSocket = false; // The socket will also be disposed when disposing this object while this is true.
-        public bool PrintPeerMessages = true; // The messages that the other peer sends will be printed out
+        public bool OwnsSocket = false; // The socket will also be disposed of when disposing this object while this is true.
         public bool AutoSendGreeting = true; // If false, then SendGreeting must be called manually before the connection can complete.
 
         // Connection Management
@@ -196,10 +154,7 @@ namespace JsChatterBox.Networking
                 if (_ConnectionStatus == 0)
                 {
                     Log_Write_System("Connecting...");
-
                     _Socket = Socket;
-                    _SocketEncoder = new SocketEncoderAssembly(Socket);
-
                     ChangeConnectionStatusValue(2);
                 }
                 else
@@ -219,7 +174,7 @@ namespace JsChatterBox.Networking
                 s = new TcpClient();
                 s.Connect(HostName, Port);
                 BeginConnect(s);
-
+                OwnsSocket = true;
                 r = true;
             }
 #if !EXPOSE_ERRORS
@@ -271,7 +226,6 @@ namespace JsChatterBox.Networking
                     OwnsSocket = false;
                 }
                 _Socket = null;
-                _SocketEncoder.Socket = null;
             }
 
             _GreetingSent = false;
@@ -312,7 +266,7 @@ namespace JsChatterBox.Networking
                 {
                     JsEncoder.ValueBase[] Param1 = new JsEncoder.ValueBase[1];
                     Param1[0] = ResponseTable;
-                    _SocketEncoder.SendInput(Param1);
+                    Encoding_SendInput(Param1);
                 }
                 else
                     _MessageOutbox.Add(ResponseTable);
@@ -420,7 +374,7 @@ namespace JsChatterBox.Networking
                     // ## BEGIN Receive
 
                     // Check on what was received.
-                    JsEncoder.ValueBase[] output = _SocketEncoder.ReceiveOutput();
+                    JsEncoder.ValueBase[] output = Encoding_CollectOutput();
                     foreach (JsEncoder.ValueBase item in output)
                     {
                         // Debug
@@ -455,7 +409,7 @@ namespace JsChatterBox.Networking
                         }
                         else if (mh == "HEARTBEAT")
                             _HeartBeatTimeout = 0;
-                        else if (mh == "HUMANMESSAGE" && PrintPeerMessages)
+                        else if (mh == "HUMANMESSAGE")
                             Log_Write(string.Format("({0}) {1}", OtherPeerDisplayName, m.Contents1S));
 
                         OutputMessage(new PeerMessage(outputT));
@@ -472,7 +426,7 @@ namespace JsChatterBox.Networking
                     // Send the pending messages
                     // Don't send anything on 3 because we want to stop communications on that stage.
                     if (_ConnectionStatus == 1 || _ConnectionStatus == 2)
-                        _SocketEncoder.SendInput(_MessageOutbox.ToArray());
+                        Encoding_SendInput(_MessageOutbox.ToArray());
                     _MessageOutbox.Clear();
 
                     // ## END Send
@@ -512,32 +466,54 @@ namespace JsChatterBox.Networking
             if (_Disposed)
                 throw new ObjectDisposedException("PeerConnection");
         }
-
-        // The Identities this connection deals with.
-        private string _ThisPeerID = null;
-        private string _OtherPeerID = null;
-
+        
         // Things to manage the connection.
         private TcpClient _Socket;
-        private SocketEncoderAssembly _SocketEncoder = new SocketEncoderAssembly();
+        private JsEncoder.EncoderStream _Encoder = new JsEncoder.EncoderStream();
+        private JsEncoder.DecoderStream _Decoder = new JsEncoder.DecoderStream();
+        private System.Text.Encoding _EncodingFormat = System.Text.Encoding.Unicode;
+        private string _ThisPeerID = null;
+        private string _OtherPeerID = null;
+        private List<JsEncoder.ValueBase> _MessageOutbox = new List<JsEncoder.ValueBase>();
+        private List<PeerMessage> _MessageInbox = new List<PeerMessage>();
+        private List<string> _Log_PendingOutput = new List<string>();
         private int _ConnectionStatus = 0; // 0 = Disconnected, 1 = Connected, 2 = Connecting, 3 = Disconnecting
         private bool _GreetingSent = false;
         private bool _GreetingReceived = false;
-        private List<JsEncoder.ValueBase> _MessageOutbox = new List<JsEncoder.ValueBase>();
-        private List<PeerMessage> _MessageInbox = new List<PeerMessage>();
-
-        // Timers
         private float _ConnectionTimeout = 0;
         private float _DisconnectTimer = 0;
         private float _HeartBeatSendTimer = 0;
         private float _HeartBeatTimeout = 0;
 
-        private List<string> _Log_PendingOutput = new List<string>();
-
         private void ChangeConnectionStatusValue(int NewStatus) { _ConnectionStatus = NewStatus; }
         private void OutputMessage(PeerMessage Message) { _MessageInbox.Add(Message); }
         private void Log_Write(string Line) { _Log_PendingOutput.Add(Line); }
         private void Log_Write_System(string Line) { Log_Write(string.Concat("[Connection] ", Line)); }
+        private void Encoding_SendInput(IEnumerable<JsEncoder.ValueBase> Data)
+        {
+            // Encode Data
+            foreach (JsEncoder.ValueBase item in Data)
+                _Encoder.InputValue(item);
+            string EncodedString = _Encoder.PopOutput();
+            char[] EncodedChars = EncodedString.ToCharArray();
+            byte[] EncodedBytes = _EncodingFormat.GetBytes(EncodedChars);
+            Socket.Client.Send(EncodedBytes);
+        }
+        private JsEncoder.ValueBase[] Encoding_CollectOutput()
+        {
+            // Receive Bytes
+            int NumberOfBytes = Socket.Available;
+            byte[] EncodedBytes = new byte[NumberOfBytes];
+            if (NumberOfBytes > 0)
+                Socket.Client.Receive(EncodedBytes);
+
+            // Decode Data
+            char[] EncodedChars = _EncodingFormat.GetChars(EncodedBytes);
+            string EncodedString = new string(EncodedChars);
+            _Decoder.InputValue(EncodedString);
+            _Decoder.RunParser();
+            return _Decoder.PopOutput();
+        }
 
         // For TcpListener Handling.
         public static PeerConnection AcceptConnectionFromTcpListener(string ThisPeerID, TcpListener Listener)
