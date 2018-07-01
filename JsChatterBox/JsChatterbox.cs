@@ -10,7 +10,7 @@ using TcpClient = System.Net.Sockets.TcpClient;
 
 namespace JsChatterBox
 {
-    public class ClientShell : IDisposable
+    public class ClientShell : IDisposable, Networking.ITextOutputLogger
     {
         public void IssueCommand(string Text)
         {
@@ -57,17 +57,17 @@ namespace JsChatterBox
         public void RunCycle(float DeltaTime)
         {
             _c.RunCycle(DeltaTime);
+            foreach (string m in _c.Log_CollectOutput())
+                Log_Write(m);
         }
         public ClientShell()
         {
             _c = new Networking.PeerConnection("Unnamed due to ClientShell.");
-            _c.OnLogOutput += _c_OnLogOutput;
         }
         public void Dispose()
         {
             if (!_Disposed)
             {
-                _c.OnLogOutput -= _c_OnLogOutput;
                 _c.Dispose();
                 _c = null;
 
@@ -85,62 +85,23 @@ namespace JsChatterBox
             _Log_PendingOutput.Add(Text);
         }
         private void Log_Write_System(string Text) { Log_Write(string.Concat("[Shell] ", Text)); }
-
-        private void _c_OnLogOutput(Networking.PeerConnection Sender, string Message) { Log_Write(Message); }
     }
 }
 namespace JsChatterBox.Networking
 {
+    public interface ITextOutputLogger
+    {
+        string[] Log_CollectOutput();
+    }
     public static class NetworkConfig
     {
         public const int DefaultServerPort = 28760;
         public const String VersionString = "V0.5dev"; // Protocol Version
-
-        public const float MaxMessagesPerSecond = 15;
+        
         public const float HeartBeatInterval = 0.5f;
-        public const float HeartBeatSilenceTimeout = 10;
-        public const float ConnectionTimeout = 20;
-        public const float DisconnectWait = 3;
-    }
-    public class SocketEncoderAssembly
-    {
-        public TcpClient Socket;
-
-        public void SendInput(IEnumerable<JsEncoder.ValueBase> Data)
-        {
-            foreach (JsEncoder.ValueBase item in Data)
-                _Encoder.InputValue(item);
-            string EncodedData = _Encoder.PopOutput();
-            char[] EncodedChars = EncodedData.ToCharArray();
-            byte[] EncodedBytes = _EncodingFormat.GetBytes(EncodedChars);
-            InputBytes(EncodedBytes);
-        }
-        public JsEncoder.ValueBase[] ReceiveOutput()
-        {
-            byte[] EncodedBytes = ReceiveOutputBytes();
-            char[] EncodedChars = _EncodingFormat.GetChars(EncodedBytes);
-            string EncodedData = new string(EncodedChars);
-            _Decoder.InputValue(EncodedData);
-            _Decoder.RunParser();
-            return _Decoder.PopOutput();
-        }
-
-        public SocketEncoderAssembly(TcpClient Socket) { this.Socket = Socket; }
-        public SocketEncoderAssembly() : this(null) { }
-
-        private System.Text.Encoding _EncodingFormat = System.Text.Encoding.Unicode;
-        private JsEncoder.EncoderStream _Encoder = new JsEncoder.EncoderStream();
-        private JsEncoder.DecoderStream _Decoder = new JsEncoder.DecoderStream();
-
-        private void InputBytes(System.Byte[] input) { Socket.Client.Send(input); }
-        private System.Byte[] ReceiveOutputBytes()
-        {
-            int NumberOfBytes = Socket.Available;
-            byte[] EncodedBytes = new byte[NumberOfBytes];
-            if (NumberOfBytes > 0)
-                Socket.Client.Receive(EncodedBytes);
-            return EncodedBytes;
-        }
+        public const float HeartBeatSilenceTimeout = 10f;
+        public const float ConnectionTimeout = 20f;
+        public const float DisconnectWait = 3f;
     }
     public struct PeerMessage
     {
@@ -169,8 +130,49 @@ namespace JsChatterBox.Networking
             Contents2S = contents2SV?.GetValue();
         }
     }
-    public class PeerConnection : IDisposable
+    public class PeerConnection : IDisposable, ITextOutputLogger
     {
+        private class SocketEncoderAssembly
+        {
+            public TcpClient Socket;
+
+            public void SendInput(IEnumerable<JsEncoder.ValueBase> Data)
+            {
+                foreach (JsEncoder.ValueBase item in Data)
+                    _Encoder.InputValue(item);
+                string EncodedData = _Encoder.PopOutput();
+                char[] EncodedChars = EncodedData.ToCharArray();
+                byte[] EncodedBytes = _EncodingFormat.GetBytes(EncodedChars);
+                InputBytes(EncodedBytes);
+            }
+            public JsEncoder.ValueBase[] ReceiveOutput()
+            {
+                byte[] EncodedBytes = ReceiveOutputBytes();
+                char[] EncodedChars = _EncodingFormat.GetChars(EncodedBytes);
+                string EncodedData = new string(EncodedChars);
+                _Decoder.InputValue(EncodedData);
+                _Decoder.RunParser();
+                return _Decoder.PopOutput();
+            }
+
+            public SocketEncoderAssembly(TcpClient Socket) { this.Socket = Socket; }
+            public SocketEncoderAssembly() : this(null) { }
+
+            private System.Text.Encoding _EncodingFormat = System.Text.Encoding.Unicode;
+            private JsEncoder.EncoderStream _Encoder = new JsEncoder.EncoderStream();
+            private JsEncoder.DecoderStream _Decoder = new JsEncoder.DecoderStream();
+
+            private void InputBytes(System.Byte[] input) { Socket.Client.Send(input); }
+            private System.Byte[] ReceiveOutputBytes()
+            {
+                int NumberOfBytes = Socket.Available;
+                byte[] EncodedBytes = new byte[NumberOfBytes];
+                if (NumberOfBytes > 0)
+                    Socket.Client.Receive(EncodedBytes);
+                return EncodedBytes;
+            }
+        }
+
         // Properties
         public string ThisPeerID { get { return _ThisPeerID; } }
         public string OtherPeerID { get { return _OtherPeerID; } }
@@ -352,10 +354,7 @@ namespace JsChatterBox.Networking
             return r;
         }
 
-        // Events
-        public event OnLogOutputHandler OnLogOutput;
-
-        // Message Loop
+        // Other Things
         public void RunCycle(float DeltaTime)
         {
             AssertNotDisposed();
@@ -487,7 +486,12 @@ namespace JsChatterBox.Networking
             }
 #endif
         }
-
+        public string[] Log_CollectOutput()
+        {
+            string[] r = _Log_PendingOutput.ToArray();
+            _Log_PendingOutput.Clear();
+            return r;
+        }
         public override string ToString() { return OtherPeerDisplayName; }
 
         // Creation and Destruction
@@ -528,9 +532,11 @@ namespace JsChatterBox.Networking
         private float _HeartBeatSendTimer = 0;
         private float _HeartBeatTimeout = 0;
 
+        private List<string> _Log_PendingOutput = new List<string>();
+
         private void ChangeConnectionStatusValue(int NewStatus) { _ConnectionStatus = NewStatus; }
         private void OutputMessage(PeerMessage Message) { _MessageInbox.Add(Message); }
-        private void Log_Write(string Line) { OnLogOutput?.Invoke(this, Line); }
+        private void Log_Write(string Line) { _Log_PendingOutput.Add(Line); }
         private void Log_Write_System(string Line) { Log_Write(string.Concat("[Connection] ", Line)); }
 
         // For TcpListener Handling.
@@ -658,7 +664,7 @@ namespace JsChatterBox.Networking
         private bool _Active = false;
         private List<PeerConnection> _PendingConnections = new List<PeerConnection>();
     }
-    public class ChatServer : IDisposable
+    public class ChatServer : IDisposable, ITextOutputLogger
     {
         private sealed class ClientInfo : IDisposable
         {
@@ -676,22 +682,14 @@ namespace JsChatterBox.Networking
                 this.ParentServer = ParentServer;
                 this.C = Connection;
                 this.ID = Id;
-
-                C.OnLogOutput += MessageOutputResponder;
             }
             public void Dispose()
             {
                 if (C != null)
                 {
-                    C.OnLogOutput -= MessageOutputResponder;
                     C.Dispose();
                     C = null;
                 }
-            }
-            
-            private void MessageOutputResponder(PeerConnection Sender, string Message)
-            {
-                ParentServer.Log_Write(string.Format("[Connection {0}] {1}", ID, Message));
             }
         }
 
@@ -782,11 +780,19 @@ namespace JsChatterBox.Networking
                 }
             }
             foreach (ClientInfo item in _Clients.ToArray())
+            {
                 item.C.RunCycle(DeltaTime);
+                foreach (string m in item.C.Log_CollectOutput())
+                    Log_Write(m);
+            }
             CheckOnClients();
         }
-
-        public event Action<string> OnLogOutput;
+        public string[] Log_CollectOutput()
+        {
+            string[] r = _Log_PendingOutput.ToArray();
+            _Log_PendingOutput.Clear();
+            return r;
+        }
 
         private int _Port;
         private bool _Active = false;
@@ -794,8 +800,9 @@ namespace JsChatterBox.Networking
 
         private TcpListener _ListenerSocket;
         private List<ClientInfo> _Clients = new List<ClientInfo>();
+        private List<string> _Log_PendingOutput = new List<string>();
 
-        private void Log_Write(string Text) { OnLogOutput?.Invoke(Text); }
+        private void Log_Write(string Text) { _Log_PendingOutput.Add(Text); }
         private void Log_Write_System(string Text) { Log_Write(string.Concat("[Server] ", Text)); }
         private void DropClient(ClientInfo client)
         {
@@ -863,5 +870,4 @@ namespace JsChatterBox.Networking
                 item.C.SendMessage(MessageHeader, Contents);
         }
     }
-    public delegate void OnLogOutputHandler(PeerConnection Sender, string Message);
 }

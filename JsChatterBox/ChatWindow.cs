@@ -22,7 +22,6 @@ namespace JsChatterBox
 
             _TitleBarBaseName = this.Text;
             _c = Connection;
-            _c.OnLogOutput += LogMessage;
             FormUpdateTimer.Start();
             UpdateGeneralControls();
         }
@@ -35,7 +34,7 @@ namespace JsChatterBox
         private PeerConnection _c;
         private String _TitleBarBaseName;
 
-        private void LogMessage(PeerConnection Sender, String Message)
+        private void LogMessage(String Message)
         {
             List<String> ChatLogLines = new List<String>(ChatLogTextBox.Lines);
             ChatLogLines.Insert(0, Message);
@@ -78,12 +77,13 @@ namespace JsChatterBox
         private void FormUpdateTimer_Tick(object sender, EventArgs e)
         {
             _c.RunCycle(FormUpdateTimer.Interval / 1000f);
+            foreach (string m in _c.Log_CollectOutput())
+                LogMessage(m);
             
             UpdateGeneralControls();
         }
         private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            _c.OnLogOutput -= LogMessage;
             if (OwnsConnection)
                 _c.Dispose();
             _c = null;

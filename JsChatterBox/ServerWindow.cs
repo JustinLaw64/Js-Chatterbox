@@ -20,7 +20,6 @@ namespace JsChatterBox
             InitializeComponent();
 
             _ServerInstance = new ChatServer(Port);
-            _ServerInstance.OnLogOutput += LogMessage;
 
             FormUpdateTimer.Start();
             UpdateClientListBox();
@@ -39,7 +38,6 @@ namespace JsChatterBox
         private void ClearLog() { LogTextBox.Lines = new String[0]; }
         private void ShutdownServer()
         {
-            _ServerInstance.OnLogOutput -= LogMessage;
             _ServerInstance.Dispose();
             FormUpdateTimer.Stop();
         }
@@ -48,6 +46,8 @@ namespace JsChatterBox
         private void FormUpdateTimer_Tick(object sender, EventArgs e)
         {
             _ServerInstance.RunCycle(FormUpdateTimer.Interval / 1000f);
+            foreach (string m in _ServerInstance.Log_CollectOutput())
+                LogMessage(m);
             UpdateClientListBox();
         }
         private void ClearLogMenuItem_Click(object sender, EventArgs e) { ClearLog(); }

@@ -24,7 +24,6 @@ namespace JsChatterBox
         }
 
         private ClientShell _c;
-        private String _TitleBarBaseName;
 
         private void LogMessage(String Message)
         {
