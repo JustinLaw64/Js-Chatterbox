@@ -178,6 +178,7 @@
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.ShutdownButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(450, 300);
             this.Name = "ServerWindow";
             this.Text = "Js ChatterBox Server";

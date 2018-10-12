@@ -40,7 +40,6 @@
             this.FormUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ClearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ConnectionSettingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.MainSplitContainer)).BeginInit();
             this.MainSplitContainer.Panel1.SuspendLayout();
@@ -54,6 +53,7 @@
             this.MainSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.MainSplitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.MainSplitContainer.Location = new System.Drawing.Point(12, 27);
             this.MainSplitContainer.Name = "MainSplitContainer";
             // 
@@ -61,6 +61,7 @@
             // 
             this.MainSplitContainer.Panel1.Controls.Add(this.label1);
             this.MainSplitContainer.Panel1.Controls.Add(this.PeopleConnectedListBox);
+            this.MainSplitContainer.Panel1MinSize = 150;
             // 
             // MainSplitContainer.Panel2
             // 
@@ -68,8 +69,9 @@
             this.MainSplitContainer.Panel2.Controls.Add(this.MessageTextBox);
             this.MainSplitContainer.Panel2.Controls.Add(this.SendMesageButton);
             this.MainSplitContainer.Panel2.Controls.Add(this.ChatLogTextBox);
+            this.MainSplitContainer.Panel2MinSize = 250;
             this.MainSplitContainer.Size = new System.Drawing.Size(440, 242);
-            this.MainSplitContainer.SplitterDistance = 167;
+            this.MainSplitContainer.SplitterDistance = 150;
             this.MainSplitContainer.TabIndex = 1;
             // 
             // label1
@@ -91,7 +93,7 @@
             this.PeopleConnectedListBox.Name = "PeopleConnectedListBox";
             this.PeopleConnectedListBox.ReadOnly = true;
             this.PeopleConnectedListBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.PeopleConnectedListBox.Size = new System.Drawing.Size(161, 223);
+            this.PeopleConnectedListBox.Size = new System.Drawing.Size(144, 223);
             this.PeopleConnectedListBox.TabIndex = 3;
             // 
             // OutputBoxLabel
@@ -110,14 +112,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MessageTextBox.Location = new System.Drawing.Point(3, 218);
             this.MessageTextBox.Name = "MessageTextBox";
-            this.MessageTextBox.Size = new System.Drawing.Size(193, 20);
+            this.MessageTextBox.Size = new System.Drawing.Size(210, 20);
             this.MessageTextBox.TabIndex = 6;
             this.MessageTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTextBox_KeyDown);
             // 
             // SendMesageButton
             // 
             this.SendMesageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.SendMesageButton.Location = new System.Drawing.Point(202, 216);
+            this.SendMesageButton.Location = new System.Drawing.Point(219, 216);
             this.SendMesageButton.Name = "SendMesageButton";
             this.SendMesageButton.Size = new System.Drawing.Size(64, 23);
             this.SendMesageButton.TabIndex = 7;
@@ -135,7 +137,7 @@
             this.ChatLogTextBox.Name = "ChatLogTextBox";
             this.ChatLogTextBox.ReadOnly = true;
             this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatLogTextBox.Size = new System.Drawing.Size(263, 196);
+            this.ChatLogTextBox.Size = new System.Drawing.Size(280, 196);
             this.ChatLogTextBox.TabIndex = 5;
             // 
             // FormUpdateTimer
@@ -147,7 +149,6 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ClearLogMenuItem,
-            this.ConnectionSettingsMenuItem,
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -161,13 +162,6 @@
             this.ClearLogMenuItem.Size = new System.Drawing.Size(69, 20);
             this.ClearLogMenuItem.Text = "Clear &Log";
             this.ClearLogMenuItem.Click += new System.EventHandler(this.ClearLogMenuItem_Click);
-            // 
-            // ConnectionSettingsMenuItem
-            // 
-            this.ConnectionSettingsMenuItem.Name = "ConnectionSettingsMenuItem";
-            this.ConnectionSettingsMenuItem.Size = new System.Drawing.Size(90, 20);
-            this.ConnectionSettingsMenuItem.Text = "&Connection...";
-            this.ConnectionSettingsMenuItem.Click += new System.EventHandler(this.ConnectionSettingsMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
@@ -187,7 +181,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(480, 320);
             this.Name = "ClientWindow";
-            this.Text = "Js ChatterBox Client";
+            this.Text = "Js ChatterBox";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatForm_FormClosed);
             this.MainSplitContainer.Panel1.ResumeLayout(false);
             this.MainSplitContainer.Panel1.PerformLayout();
@@ -213,7 +207,6 @@
         private System.Windows.Forms.Label OutputBoxLabel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem ConnectionSettingsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ClearLogMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }

@@ -3,27 +3,16 @@
 
 #pragma once
 
-// You can redefine these in your code so that they use another type.
-#ifndef JsEncoder_Namespace
-#define JsEncoder_Namespace JsEncoder
-#endif
-#ifndef JsEncoder_Type_Boolean
-#define JsEncoder_Type_Boolean bool
-#endif
-#ifndef JsEncoder_Type_Int
+// You can change these so that they use another type.
+// Note that changing these may cause problems.
 #define JsEncoder_Type_Int int
-#endif
-#ifndef JsEncoder_Type_Float
 #define JsEncoder_Type_Float double
-#endif
-#ifndef JsEncoder_Type_Char
 #define JsEncoder_Type_Char wchar_t
-#endif
 
-// The code that makes this file work
+// Below is the important code.
 
 #define GenericCollections System::Collections::Generic
-namespace JsEncoder_Namespace {
+namespace JsEncoder {
 	using namespace System;
 	using namespace System::Collections::Generic;
 	using namespace System::Text;

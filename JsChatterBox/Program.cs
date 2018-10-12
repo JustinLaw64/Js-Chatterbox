@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FileIO = System.IO.File;
+using DirectoryIO = System.IO.Directory;
+using JsChatterBoxNetworking;
+using JsChatterBoxNetworking.Implementations;
 
 namespace JsChatterBox
 {
@@ -10,6 +14,14 @@ namespace JsChatterBox
     {
         public static PersistentDataManager DataManager = null;
 
+        public static ClientWindow OpenChatConnection(PeerConnection ExistingConnection)
+        {
+            ClientWindow NewWindow = new ClientWindow(ExistingConnection);
+            NewWindow.OwnsConnection = true;
+            NewWindow.Show();
+
+            return NewWindow;
+        }
         public static ClientWindow OpenChatConnection(String HostName, int Port)
         {
             HostInformation NewInfo = new HostInformation(HostName, Port);
@@ -41,49 +53,63 @@ namespace JsChatterBox
     {
         // This is where the data save folder will be stored.
         public bool IsLoaded { get { return _IsLoaded; } }
+
+        // Data
         public String UserName = null;
+        public int WorkingPort = NetworkConstants.DefaultServerPort; // To tailor to the user's specified port.
         public UserHostList HostList = null;
 
         public void Save()
         {
             if (_IsLoaded)
             {
-                System.IO.Directory.CreateDirectory(DataSavePath);
+                DirectoryIO.CreateDirectory(DataSavePath);
 
                 String HostListAsText = JsEncoder.EncoderStream.EncodeTable(UserHostList.ToTable(HostList));
+                String ConfigAsText; // This won't be null after the region below
+
+                #region ConfigFileSaving
+                {
+                    JsEncoder.TableValue ConfigTable = new JsEncoder.TableValue();
+                    ConfigTable.Set(new JsEncoder.StringValue("UserName"), new JsEncoder.StringValue(UserName));
+                    ConfigTable.Set(new JsEncoder.StringValue("WorkingPort"), new JsEncoder.IntValue(WorkingPort));
+
+                    ConfigAsText = JsEncoder.EncoderStream.EncodeTable(ConfigTable);
+                }
+                #endregion
 
                 String VersionFileBackupPath = String.Concat(VersionFilePath, ".bak");
-                String UserNameFileBackupPath = String.Concat(UserNameFilePath, ".bak");
+                String ConfigFileBackupPath = String.Concat(ConfigFilePath, ".bak");
                 String HostListFileBackupPath = String.Concat(HostListFilePath, ".bak");
 
-                if (System.IO.File.Exists(VersionFileBackupPath)) System.IO.File.Delete(VersionFileBackupPath);
-                if (System.IO.File.Exists(UserNameFileBackupPath)) System.IO.File.Delete(UserNameFileBackupPath);
-                if (System.IO.File.Exists(HostListFileBackupPath)) System.IO.File.Delete(HostListFileBackupPath);
+                if (FileIO.Exists(VersionFileBackupPath)) FileIO.Delete(VersionFileBackupPath);
+                if (FileIO.Exists(ConfigFileBackupPath)) FileIO.Delete(ConfigFileBackupPath);
+                if (FileIO.Exists(HostListFileBackupPath)) FileIO.Delete(HostListFileBackupPath);
 
-                if (System.IO.File.Exists(VersionFilePath)) System.IO.File.Move(VersionFilePath, VersionFileBackupPath);
-                if (System.IO.File.Exists(UserNameFilePath)) System.IO.File.Move(UserNameFilePath, UserNameFileBackupPath);
-                if (System.IO.File.Exists(HostListFilePath)) System.IO.File.Move(HostListFilePath, HostListFileBackupPath);
+                if (FileIO.Exists(VersionFilePath)) FileIO.Move(VersionFilePath, VersionFileBackupPath);
+                if (FileIO.Exists(ConfigFilePath)) FileIO.Move(ConfigFilePath, ConfigFileBackupPath);
+                if (FileIO.Exists(HostListFilePath)) FileIO.Move(HostListFilePath, HostListFileBackupPath);
 
-                System.IO.File.WriteAllText(VersionFilePath, NetworkConstants.VersionString, System.Text.Encoding.Unicode);
-                System.IO.File.WriteAllText(UserNameFilePath, UserName, System.Text.Encoding.Unicode);
-                System.IO.File.WriteAllText(HostListFilePath, HostListAsText, System.Text.Encoding.Unicode);
+                FileIO.WriteAllText(VersionFilePath, NetworkConstants.VersionString, System.Text.Encoding.Unicode);
+                FileIO.WriteAllText(ConfigFilePath, ConfigAsText, System.Text.Encoding.Unicode);
+                FileIO.WriteAllText(HostListFilePath, HostListAsText, System.Text.Encoding.Unicode);
             }
         }
         public bool Load()
         {
             bool r = false;
 
-            bool ve = System.IO.File.Exists(VersionFilePath);
+            bool ve = FileIO.Exists(VersionFilePath);
             if (ve)
             {
-                String VersionFileContents = System.IO.File.ReadAllText(VersionFilePath, System.Text.Encoding.Unicode);
+                String VersionFileContents = FileIO.ReadAllText(VersionFilePath, System.Text.Encoding.Unicode);
                 if (VersionFileContents == NetworkConstants.VersionString)
                     r = true;
                 else
                 {
                     String IncompatPath = String.Concat(DataSavePath, "_", VersionFileContents);
-                    if (System.IO.Directory.Exists(IncompatPath)) System.IO.Directory.Delete(IncompatPath);
-                    System.IO.Directory.Move(DataSavePath, IncompatPath);
+                    if (DirectoryIO.Exists(IncompatPath)) DirectoryIO.Delete(IncompatPath, true);
+                    DirectoryIO.Move(DataSavePath, IncompatPath);
                     System.Windows.Forms.MessageBox.Show(String.Concat(
                         "The application tried to load Js ChatterBox files that were incompatible ",
                         "with this version. They have been moved to \"", IncompatPath, "\"."));
@@ -94,8 +120,17 @@ namespace JsChatterBox
             {
                 try
                 {
-                    UserName = System.IO.File.ReadAllText(UserNameFilePath, System.Text.Encoding.Unicode);
-                    String HostListFileContents = System.IO.File.ReadAllText(HostListFilePath, System.Text.Encoding.Unicode);
+                    #region ConfigFileLoading
+                    {
+                        String ConfigText = FileIO.ReadAllText(ConfigFilePath, System.Text.Encoding.Unicode);
+                        JsEncoder.TableValue ConfigTable = (JsEncoder.TableValue)JsEncoder.DecoderStream.DecodeValue(ConfigText);
+
+                        UserName = ((JsEncoder.StringValue)ConfigTable.Get(new JsEncoder.StringValue("UserName"))).GetValue();
+                        WorkingPort = ((JsEncoder.IntValue)ConfigTable.Get(new JsEncoder.StringValue("WorkingPort"))).GetValue();
+                    }
+                    #endregion
+
+                    String HostListFileContents = FileIO.ReadAllText(HostListFilePath, System.Text.Encoding.Unicode);
                     JsEncoder.TableValue HostListTable = (JsEncoder.TableValue)JsEncoder.DecoderStream.DecodeValue(HostListFileContents);
                     HostList = UserHostList.FromTable(HostListTable);
                 }
@@ -108,10 +143,10 @@ namespace JsChatterBox
                     {
                         i++;
                         FinalIncompatPath = BaseIncompatPath.Replace("<N>", i.ToString());
-                        if (System.IO.File.Exists(FinalIncompatPath))
+                        if (DirectoryIO.Exists(FinalIncompatPath))
                             FinalIncompatPath = null;
                     }
-                    System.IO.Directory.Move(DataSavePath, FinalIncompatPath);
+                    DirectoryIO.Move(DataSavePath, FinalIncompatPath);
 
                     r = false;
                     System.Windows.Forms.MessageBox.Show(String.Concat(
@@ -124,16 +159,18 @@ namespace JsChatterBox
             {
                 UserName = "Unnamed";
                 HostList = new UserHostList();
+                WorkingPort = NetworkConstants.DefaultServerPort;
             }
             _IsLoaded = true;
             return r;
         }
+        public PeerIdentity GetPeerIdentity() { return new PeerIdentity(0, UserName); }
 
         private bool _IsLoaded = false;
 
         public static String DataSavePath { get { return ("{0}\\JsChatterBox").Replace("{0}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)); } }
         public static String VersionFilePath { get { return String.Concat(DataSavePath, "\\Version.dat"); } }
-        public static String UserNameFilePath { get { return String.Concat(DataSavePath, "\\UserName.dat"); } }
+        public static String ConfigFilePath { get { return String.Concat(DataSavePath, "\\Config.dat"); } }
         public static String HostListFilePath { get { return String.Concat(DataSavePath, "\\HostList.dat"); } }
     }
     public class UserHostList
