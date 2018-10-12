@@ -30,6 +30,7 @@ namespace JsChatterBox
         private void ChangeNameCommand()
         {
             String NewName = ClientNameTextBox.Text;
+            Program.DataManager.UserName = NewName;
             if (NewName != _ClientInstance.ClientID.Name)
                 _ClientInstance.ChangeName(NewName);
         }

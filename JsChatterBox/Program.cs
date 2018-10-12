@@ -41,6 +41,7 @@ namespace JsChatterBox
     {
         // This is where the data save folder will be stored.
         public bool IsLoaded { get { return _IsLoaded; } }
+        public String UserName = null;
         public UserHostList HostList = null;
 
         public void Save()
@@ -52,14 +53,19 @@ namespace JsChatterBox
                 String HostListAsText = JsEncoder.EncoderStream.EncodeTable(UserHostList.ToTable(HostList));
 
                 String VersionFileBackupPath = String.Concat(VersionFilePath, ".bak");
+                String UserNameFileBackupPath = String.Concat(UserNameFilePath, ".bak");
                 String HostListFileBackupPath = String.Concat(HostListFilePath, ".bak");
 
                 if (System.IO.File.Exists(VersionFileBackupPath)) System.IO.File.Delete(VersionFileBackupPath);
+                if (System.IO.File.Exists(UserNameFileBackupPath)) System.IO.File.Delete(UserNameFileBackupPath);
                 if (System.IO.File.Exists(HostListFileBackupPath)) System.IO.File.Delete(HostListFileBackupPath);
+
                 if (System.IO.File.Exists(VersionFilePath)) System.IO.File.Move(VersionFilePath, VersionFileBackupPath);
+                if (System.IO.File.Exists(UserNameFilePath)) System.IO.File.Move(UserNameFilePath, UserNameFileBackupPath);
                 if (System.IO.File.Exists(HostListFilePath)) System.IO.File.Move(HostListFilePath, HostListFileBackupPath);
 
                 System.IO.File.WriteAllText(VersionFilePath, NetworkConstants.VersionString, System.Text.Encoding.Unicode);
+                System.IO.File.WriteAllText(UserNameFilePath, UserName, System.Text.Encoding.Unicode);
                 System.IO.File.WriteAllText(HostListFilePath, HostListAsText, System.Text.Encoding.Unicode);
             }
         }
@@ -78,18 +84,45 @@ namespace JsChatterBox
                     String IncompatPath = String.Concat(DataSavePath, "_", VersionFileContents);
                     if (System.IO.Directory.Exists(IncompatPath)) System.IO.Directory.Delete(IncompatPath);
                     System.IO.Directory.Move(DataSavePath, IncompatPath);
-                    System.Windows.Forms.MessageBox.Show(String.Concat("The application tried to load Js ChatterBox files that were incompatible with this version. They have been moved to \"", IncompatPath, "\"."));
+                    System.Windows.Forms.MessageBox.Show(String.Concat(
+                        "The application tried to load Js ChatterBox files that were incompatible ",
+                        "with this version. They have been moved to \"", IncompatPath, "\"."));
                 }
             }
 
             if (r)
             {
-                String HostListFileContents = System.IO.File.ReadAllText(HostListFilePath, System.Text.Encoding.Unicode);
-                JsEncoder.TableValue HostListTable = (JsEncoder.TableValue)JsEncoder.DecoderStream.DecodeValue(HostListFileContents);
-                HostList = UserHostList.FromTable(HostListTable);
+                try
+                {
+                    UserName = System.IO.File.ReadAllText(UserNameFilePath, System.Text.Encoding.Unicode);
+                    String HostListFileContents = System.IO.File.ReadAllText(HostListFilePath, System.Text.Encoding.Unicode);
+                    JsEncoder.TableValue HostListTable = (JsEncoder.TableValue)JsEncoder.DecoderStream.DecodeValue(HostListFileContents);
+                    HostList = UserHostList.FromTable(HostListTable);
+                }
+                catch (Exception e)
+                {
+                    String BaseIncompatPath = String.Concat(DataSavePath, "_Damaged<N>");
+                    String FinalIncompatPath = null;
+                    int i = 0;
+                    while (FinalIncompatPath == null)
+                    {
+                        i++;
+                        FinalIncompatPath = BaseIncompatPath.Replace("<N>", i.ToString());
+                        if (System.IO.File.Exists(FinalIncompatPath))
+                            FinalIncompatPath = null;
+                    }
+                    System.IO.Directory.Move(DataSavePath, FinalIncompatPath);
+
+                    r = false;
+                    System.Windows.Forms.MessageBox.Show(String.Concat(
+                        "An error occured while loading your save files. They have been moved to \"",
+                        FinalIncompatPath , "\" and you will now get the defaults. ",
+                        "The error message is \"", e.Message, "\"."));
+                }
             }
-            else
+            if (!r)
             {
+                UserName = "Unnamed";
                 HostList = new UserHostList();
             }
             _IsLoaded = true;
@@ -98,9 +131,9 @@ namespace JsChatterBox
 
         private bool _IsLoaded = false;
 
-        public const String DataSavePath = "%LOCALAPPDATA%\\JsChatterBox";
-
+        public static String DataSavePath { get { return ("{0}\\JsChatterBox").Replace("{0}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)); } }
         public static String VersionFilePath { get { return String.Concat(DataSavePath, "\\Version.dat"); } }
+        public static String UserNameFilePath { get { return String.Concat(DataSavePath, "\\UserName.dat"); } }
         public static String HostListFilePath { get { return String.Concat(DataSavePath, "\\HostList.dat"); } }
     }
     public class UserHostList
@@ -171,7 +204,7 @@ namespace JsChatterBox
         {
             JsEncoder.StringValue HostNameV = (JsEncoder.StringValue)Value.Get(1);
             JsEncoder.IntValue PortV = (JsEncoder.IntValue)Value.Get(2);
-            return new HostInformation(HostNameV.Value, PortV.Value);
+            return new HostInformation(HostNameV.GetValue(), PortV.GetValue());
         }
 
         public HostInformation(String HostName, int Port)

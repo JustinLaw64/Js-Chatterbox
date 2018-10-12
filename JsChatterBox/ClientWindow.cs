@@ -18,7 +18,7 @@ namespace JsChatterBox
         {
             InitializeComponent();
 
-            _ClientInstance = new ChatClient();
+            _ClientInstance = new ChatClient(new PeerIdentity(0, Program.DataManager.UserName));
             _ClientInstance.OnHumanLogOutput += LogMessage;
             FormUpdateTimer.Start();
             UpdateGeneralControls();
