@@ -68,7 +68,7 @@ namespace JsChatterBox
         private void SendMesageButton_Click(object sender, EventArgs e) { SendMessageCommand(); }
         private void MessageTextBox_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) SendMessageCommand(); }
         private void ClearLogMenuItem_Click(object sender, EventArgs e) { ClearLog(); }
-        private void DisconnectMenuItem_Click(object sender, EventArgs e) { if (_c.IsConnected) _c.BeginDisconnect(0, true); }
+        private void DisconnectMenuItem_Click(object sender, EventArgs e) { if (_c.IsConnected) _c.BeginDisconnect(); }
         private void HelpAboutMenuItem_Click(object sender, EventArgs e)
         {
             AboutBox NewWindow = new AboutBox();

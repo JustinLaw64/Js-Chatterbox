@@ -13,7 +13,7 @@ namespace JsChatterBox
     {
         public static PersistentDataManager DataManager = null;
 
-        public static ChatWindow OpenChatConnection(PeerConnection ExistingConnection)
+        public static ChatWindow OpenChatWindow(PeerConnection ExistingConnection)
         {
             ChatWindow NewWindow = new ChatWindow(ExistingConnection);
             NewWindow.OwnsConnection = true;

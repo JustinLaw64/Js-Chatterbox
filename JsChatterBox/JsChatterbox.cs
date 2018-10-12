@@ -10,7 +10,7 @@ using TcpClient = System.Net.Sockets.TcpClient;
 
 namespace JsChatterBox
 {
-    public class ClientShell : IDisposable, Networking.ITextOutputLogger
+    public class ClientShell : IDisposable, ITextOutputLogger
     {
         public void IssueCommand(string Text)
         {
@@ -31,7 +31,7 @@ namespace JsChatterBox
                         _c.BeginConnect(h, p);
                         break;
                     case "/disconnect":
-                        _c.BeginDisconnect(0, true);
+                        _c.BeginDisconnect();
                         break;
                     case "/help":
                         Log_Write_System("/Connect [Hostname] [Port] - Tells the client to connect to a Js Chatterbox server.");
@@ -86,13 +86,13 @@ namespace JsChatterBox
         }
         private void Log_Write_System(string Text) { Log_Write(string.Concat("[Shell] ", Text)); }
     }
-}
-namespace JsChatterBox.Networking
-{
     public interface ITextOutputLogger
     {
         string[] Log_CollectOutput();
     }
+}
+namespace JsChatterBox.Networking
+{
     public static class NetworkConfig
     {
         public const int DefaultServerPort = 28760;
@@ -138,7 +138,7 @@ namespace JsChatterBox.Networking
         public String OtherPeerDisplayName { get { return (_OtherPeerID ?? "Unknown"); } }
         public TcpClient Socket { get { return _Socket; } }
         public int ConnectionStatus { get { return _ConnectionStatus; } }
-        public bool IsConnected { get { return (_ConnectionStatus == 1); } }
+        public bool IsConnected { get { return _ConnectionStatus == 1; } }
         public bool GreetingSent { get { return _GreetingSent; } }
         public bool GreetingReceived { get { return _GreetingReceived; } }
         public bool OwnsSocket = false; // The socket will also be disposed of when disposing this object while this is true.
@@ -193,7 +193,7 @@ namespace JsChatterBox.Networking
                 }
             }
         }
-        public void BeginDisconnect(int ReasonID, bool WarnOtherPeer) // Begins disconnecting from the other peer.
+        public void BeginDisconnect(bool WarnOtherPeer = true) // Begins disconnecting from the other peer.
         {
             AssertNotDisposed();
 
@@ -203,7 +203,7 @@ namespace JsChatterBox.Networking
                 if (WarnOtherPeer)
                 {
                     JsEncoder.ValueBase[] Param2 = new JsEncoder.ValueBase[1];
-                    Param2[0] = new JsEncoder.IntValue(ReasonID);
+                    Param2[0] = new JsEncoder.IntValue(0);
                     SendMessage("DISCONNECTING", Param2, true);
                 }
                 ChangeConnectionStatusValue(3);
@@ -218,15 +218,12 @@ namespace JsChatterBox.Networking
             ChangeConnectionStatusValue(0);
             _MessageOutbox.Clear();
             _OtherPeerID = null;
-            if (_Socket != null)
+            if (_Socket != null && OwnsSocket)
             {
-                if (OwnsSocket)
-                {
-                    _Socket.Close();
-                    OwnsSocket = false;
-                }
-                _Socket = null;
+                _Socket.Close();
+                OwnsSocket = false;
             }
+            _Socket = null;
 
             _GreetingSent = false;
             _GreetingReceived = false;
@@ -239,16 +236,9 @@ namespace JsChatterBox.Networking
 
         public void SendMessage(string MessageHeader, string Contents)
         {
-            string[] NewArray = new string[1];
-            NewArray[0] = Contents;
+            JsEncoder.ValueBase[] NewArray = new JsEncoder.ValueBase[1];
+            NewArray[0] = new JsEncoder.StringValue(Contents);
             SendMessage(MessageHeader, NewArray);
-        }
-        public void SendMessage(string MessageHeader, IEnumerable<string> Contents)
-        {
-            List<JsEncoder.ValueBase> ResponseArray = new List<JsEncoder.ValueBase>();
-            foreach (string item in Contents)
-                ResponseArray.Add(new JsEncoder.StringValue(item));
-            SendMessage(MessageHeader, ResponseArray);
         }
         public void SendMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents) { SendMessage(MessageHeader, Contents, false); }
         public void SendMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents, bool SendImmediately)
@@ -274,30 +264,22 @@ namespace JsChatterBox.Networking
         }
         public void SendGreeting()
         {
-            if (_ConnectionStatus == 2)
+            if (_ConnectionStatus == 2 & !_GreetingSent)
             {
-                if (!_GreetingSent)
-                {
-                    JsEncoder.ValueBase[] Values = new JsEncoder.ValueBase[2];
-                    Values[0] = new JsEncoder.StringValue(NetworkConfig.VersionString);
-                    Values[1] = new JsEncoder.StringValue(_ThisPeerID);
+                JsEncoder.ValueBase[] Values = new JsEncoder.ValueBase[2];
+                Values[0] = new JsEncoder.StringValue(NetworkConfig.VersionString);
+                Values[1] = new JsEncoder.StringValue(_ThisPeerID);
 
-                    SendMessage("GREETING", Values);
-                    _GreetingSent = true;
-                }
-                else
-                    Log_Write_System("SendGreeting was called again even though one was sent. Not sending another one.");
+                SendMessage("GREETING", Values);
+                _GreetingSent = true;
             }
             else
-                Log_Write_System("SendGreeting was called when the ConnectionStatus wasn't 2 (Connecting).");
+                Log_Write_System("SendGreeting was called even though it's not necessary.");
         }
         public void SendHumanMessage(string Contents)
         {
-            if (Contents != null & Contents != "")
-            {
-                Log_Write(string.Format("[{0}] {1}", _ThisPeerID, Contents));
+            if (!string.IsNullOrEmpty(Contents))
                 SendMessage("HUMANMESSAGE", Contents);
-            }
         }
         public PeerMessage[] CollectInboxMessages()
         {
@@ -317,12 +299,12 @@ namespace JsChatterBox.Networking
             try
 #endif
             {
-                // ## BEGIN ConnectionStateSpecific
+                // Connection-State Specific Operations
                 switch (_ConnectionStatus)
                 {
                     case 1: // Connected
 
-                        // Send a HeartBeat
+                        // Send HeartBeats
                         _HeartBeatSendTimer += DeltaTime;
                         if (_HeartBeatSendTimer > NetworkConfig.HeartBeatInterval)
                         {
@@ -366,7 +348,6 @@ namespace JsChatterBox.Networking
                     default:
                         break;
                 }
-                // ## END ConnectionStateSpecific
 
                 // Mailing Procedure
                 if (_Socket != null && _Socket.Connected)
@@ -404,7 +385,7 @@ namespace JsChatterBox.Networking
                         else if (mh == "DISCONNECTING")
                         {
                             if (_ConnectionStatus == 1)
-                                BeginDisconnect(0, false);
+                                BeginDisconnect(false);
                             break;
                         }
                         else if (mh == "HEARTBEAT")
@@ -497,15 +478,15 @@ namespace JsChatterBox.Networking
             string EncodedString = _Encoder.PopOutput();
             char[] EncodedChars = EncodedString.ToCharArray();
             byte[] EncodedBytes = _EncodingFormat.GetBytes(EncodedChars);
-            Socket.Client.Send(EncodedBytes);
+            _Socket.Client.Send(EncodedBytes);
         }
         private JsEncoder.ValueBase[] Encoding_CollectOutput()
         {
             // Receive Bytes
-            int NumberOfBytes = Socket.Available;
+            int NumberOfBytes = _Socket.Available;
             byte[] EncodedBytes = new byte[NumberOfBytes];
             if (NumberOfBytes > 0)
-                Socket.Client.Receive(EncodedBytes);
+                _Socket.Client.Receive(EncodedBytes);
 
             // Decode Data
             char[] EncodedChars = _EncodingFormat.GetChars(EncodedBytes);
@@ -620,7 +601,7 @@ namespace JsChatterBox.Networking
         {
             bool r = _PendingConnections.Remove(Connection);
             if (r)
-                Connection.BeginDisconnect(0, true);
+                Connection.BeginDisconnect(true);
             return r;
         }
         public bool AcceptConnection(PeerConnection Connection)
@@ -828,14 +809,8 @@ namespace JsChatterBox.Networking
         }
 
         private void SendMessage(ClientInfo Client, string MessageHeader, string Contents) { Client.C.SendMessage(MessageHeader, Contents); }
-        private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<string> Contents) { Client.C.SendMessage(MessageHeader, Contents); }
         private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents) { Client.C.SendMessage(MessageHeader, Contents); }
         private void BroadcastMessage(string MessageHeader, string Contents)
-        {
-            foreach (ClientInfo item in _Clients.ToArray())
-                item.C.SendMessage(MessageHeader, Contents);
-        }
-        private void BroadcastMessage(string MessageHeader, IEnumerable<string> Contents)
         {
             foreach (ClientInfo item in _Clients.ToArray())
                 item.C.SendMessage(MessageHeader, Contents);

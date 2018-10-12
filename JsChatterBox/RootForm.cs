@@ -266,7 +266,7 @@ namespace JsChatterBox
             PeerConnection s = RequestAnswerer_GetSelection();
             if (s != null)
             {
-                Program.OpenChatConnection(s);
+                Program.OpenChatWindow(s);
                 RequestAnswerer_Listener.AcceptConnection(s);
             }
         }
