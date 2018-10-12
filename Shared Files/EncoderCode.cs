@@ -1,4 +1,6 @@
-﻿using System;
+﻿// JsEncoder C#.NET Version
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -187,6 +189,12 @@ namespace JsEncoder
             Dictionary.TryGetValue(ID, out r);
             return r;
         }
+        public void Set(int ID, ValueBase Value) { Set(new IntValue(ID), Value); }
+        public void Set(ValueBase ID, ValueBase Value)
+        {
+            Dictionary.Remove(ID);
+            Dictionary.Add(ID, Value);
+        }
 
         public override int GetHashCode() { return Dictionary.GetHashCode(); } // Microsoft Specific
 
@@ -300,7 +308,7 @@ namespace JsEncoder
             // Turn everything into text.
             foreach (var item in DigestedTable.AutoIntArray)
             {
-                Result.Append(item.EncodeIntoValue());
+                Result.Append(EncoderStream.EncodeValue(item));
                 Result.Append(';');
             }
             foreach (var item in DigestedTable.ManualIntDictionary)
@@ -308,10 +316,7 @@ namespace JsEncoder
                 ValueBase v = item.Value;
                 Result.Append(item.Key.ToString());
                 Result.Append(':');
-                if (v != null)
-                    Result.Append(v.EncodeIntoValue());
-                else
-                    Result.Append("N");
+                Result.Append(EncoderStream.EncodeValue(v));
                 Result.Append(';');
             }
             foreach (var item in DigestedTable.MiscKeyDictionary)
@@ -319,10 +324,7 @@ namespace JsEncoder
                 Result.Append(item.Key.EncodeIntoValue());
                 Result.Append(':');
                 ValueBase v = item.Value;
-                if (v != null)
-                    Result.Append(v.EncodeIntoValue());
-                else
-                    Result.Append("N");
+                Result.Append(EncoderStream.EncodeValue(v));
                 Result.Append(';');
             }
 
@@ -511,7 +513,7 @@ namespace JsEncoder
                                 else
                                 {
                                     ValueBase o = null;
-                                    switch (c)
+                                    switch (P_ValueParser_ValueRaw[0])
                                     {
                                         case 'N':
                                             o = null;
@@ -593,13 +595,13 @@ namespace JsEncoder
 
                     #region TableChars
                     // Table-Specific
-                    if (!P_ValueParser_StringMode)
+                    if (!P_ValueParser_StringMode) // Only process these when not in a string.
                     {
-                        if (CurrentTable != null) // Only process these when not in a string.
+                        if (CurrentTable != null)
                         {
                             bool handled1 = true;
 
-                            int EndType = 0;
+                            int EndType = 0; // 1 = Finish value and ready for next. 2 = Finish value and table.
                             switch (c)
                             {
                                 case ':':
@@ -624,22 +626,25 @@ namespace JsEncoder
                             }
                             if (EndType > 0)
                             {
-                                CurrentTable.V2 = P_ValueParser_TakeValue();
-
-                                ValueBase V1 = CurrentTable.V1;
-                                ValueBase V2 = CurrentTable.V2;
-
-                                if (V2 != null)
+                                if (P_ValueParser_ValueType != -1)
                                 {
-                                    if (V1 != null)
+                                    CurrentTable.V2 = P_ValueParser_TakeValue();
+
+                                    ValueBase V1 = CurrentTable.V1;
+                                    ValueBase V2 = CurrentTable.V2;
+
+                                    if (V2 != null)
                                     {
-                                        if (CurrentTable.V1.GetValueType() == ValueType.Int)
-                                            CurrentTable.Table.ManualIntDictionary.Add(((IntValue)V1).Value, V2);
+                                        if (V1 != null)
+                                        {
+                                            if (CurrentTable.V1.GetValueType() == ValueType.Int)
+                                                CurrentTable.Table.ManualIntDictionary.Add(((IntValue)V1).Value, V2);
+                                            else
+                                                CurrentTable.Table.MiscKeyDictionary.Add(V1, V2);
+                                        }
                                         else
-                                            CurrentTable.Table.MiscKeyDictionary.Add(V1, V2);
+                                            CurrentTable.Table.AutoIntArray.Add(V2);
                                     }
-                                    else
-                                        CurrentTable.Table.AutoIntArray.Add(V2);
                                 }
 
                                 // Clear these so we can use them later.

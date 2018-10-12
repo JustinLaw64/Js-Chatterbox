@@ -37,7 +37,6 @@
             this.ClientNameChangeButton = new System.Windows.Forms.Button();
             this.ClientNameTextBox = new System.Windows.Forms.TextBox();
             this.NoteLabel = new System.Windows.Forms.Label();
-            this.CreateServerButton = new System.Windows.Forms.Button();
             this.CloseButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -46,7 +45,7 @@
             this.ConnectButton.Location = new System.Drawing.Point(12, 147);
             this.ConnectButton.Name = "ConnectButton";
             this.ConnectButton.Size = new System.Drawing.Size(80, 23);
-            this.ConnectButton.TabIndex = 8;
+            this.ConnectButton.TabIndex = 6;
             this.ConnectButton.Text = "C&onnect";
             this.ConnectButton.UseVisualStyleBackColor = true;
             this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
@@ -57,7 +56,7 @@
             this.label2.Location = new System.Drawing.Point(9, 105);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(94, 13);
-            this.label2.TabIndex = 11;
+            this.label2.TabIndex = 4;
             this.label2.Text = "Server HostName:";
             // 
             // DisconnectButton
@@ -65,7 +64,7 @@
             this.DisconnectButton.Location = new System.Drawing.Point(98, 147);
             this.DisconnectButton.Name = "DisconnectButton";
             this.DisconnectButton.Size = new System.Drawing.Size(80, 23);
-            this.DisconnectButton.TabIndex = 10;
+            this.DisconnectButton.TabIndex = 7;
             this.DisconnectButton.Text = "&Disconnect";
             this.DisconnectButton.UseVisualStyleBackColor = true;
             this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
@@ -77,7 +76,7 @@
             this.HostAddressBox.Location = new System.Drawing.Point(12, 121);
             this.HostAddressBox.Name = "HostAddressBox";
             this.HostAddressBox.Size = new System.Drawing.Size(260, 20);
-            this.HostAddressBox.TabIndex = 9;
+            this.HostAddressBox.TabIndex = 5;
             this.HostAddressBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HostAddressBox_KeyDown);
             // 
             // ClientNameLabel
@@ -86,7 +85,7 @@
             this.ClientNameLabel.Location = new System.Drawing.Point(9, 66);
             this.ClientNameLabel.Name = "ClientNameLabel";
             this.ClientNameLabel.Size = new System.Drawing.Size(63, 13);
-            this.ClientNameLabel.TabIndex = 14;
+            this.ClientNameLabel.TabIndex = 1;
             this.ClientNameLabel.Text = "Your Name:";
             // 
             // ClientNameChangeButton
@@ -95,7 +94,7 @@
             this.ClientNameChangeButton.Location = new System.Drawing.Point(208, 80);
             this.ClientNameChangeButton.Name = "ClientNameChangeButton";
             this.ClientNameChangeButton.Size = new System.Drawing.Size(64, 23);
-            this.ClientNameChangeButton.TabIndex = 13;
+            this.ClientNameChangeButton.TabIndex = 3;
             this.ClientNameChangeButton.Text = "Change";
             this.ClientNameChangeButton.UseVisualStyleBackColor = true;
             this.ClientNameChangeButton.Click += new System.EventHandler(this.ClientNameChangeButton_Click);
@@ -107,7 +106,7 @@
             this.ClientNameTextBox.Location = new System.Drawing.Point(12, 82);
             this.ClientNameTextBox.Name = "ClientNameTextBox";
             this.ClientNameTextBox.Size = new System.Drawing.Size(190, 20);
-            this.ClientNameTextBox.TabIndex = 12;
+            this.ClientNameTextBox.TabIndex = 2;
             this.ClientNameTextBox.Text = "Unnamed";
             this.ClientNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ClientNameTextBox_KeyDown);
             // 
@@ -118,21 +117,10 @@
             this.NoteLabel.Location = new System.Drawing.Point(9, 9);
             this.NoteLabel.Name = "NoteLabel";
             this.NoteLabel.Size = new System.Drawing.Size(263, 57);
-            this.NoteLabel.TabIndex = 16;
+            this.NoteLabel.TabIndex = 0;
             this.NoteLabel.Text = "The connection your client is on is managed here. Make sure the name you\'re using" +
     " is right as others will be able to see it. The server hostname is the address o" +
     "f the server you want to connect to.";
-            // 
-            // CreateServerButton
-            // 
-            this.CreateServerButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.CreateServerButton.Location = new System.Drawing.Point(12, 243);
-            this.CreateServerButton.Name = "CreateServerButton";
-            this.CreateServerButton.Size = new System.Drawing.Size(80, 23);
-            this.CreateServerButton.TabIndex = 15;
-            this.CreateServerButton.Text = "Create &Server";
-            this.CreateServerButton.UseVisualStyleBackColor = true;
-            this.CreateServerButton.Click += new System.EventHandler(this.CreateServerButton_Click);
             // 
             // CloseButton
             // 
@@ -141,7 +129,7 @@
             this.CloseButton.Location = new System.Drawing.Point(192, 243);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(80, 23);
-            this.CloseButton.TabIndex = 7;
+            this.CloseButton.TabIndex = 9;
             this.CloseButton.Text = "&Close";
             this.CloseButton.UseVisualStyleBackColor = true;
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
@@ -150,12 +138,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.CloseButton;
             this.ClientSize = new System.Drawing.Size(284, 278);
             this.Controls.Add(this.ClientNameChangeButton);
             this.Controls.Add(this.ClientNameLabel);
             this.Controls.Add(this.NoteLabel);
             this.Controls.Add(this.ConnectButton);
-            this.Controls.Add(this.CreateServerButton);
             this.Controls.Add(this.ClientNameTextBox);
             this.Controls.Add(this.HostAddressBox);
             this.Controls.Add(this.label2);
@@ -183,7 +171,6 @@
         private System.Windows.Forms.Button ClientNameChangeButton;
         private System.Windows.Forms.TextBox ClientNameTextBox;
         private System.Windows.Forms.Label NoteLabel;
-        private System.Windows.Forms.Button CreateServerButton;
         private System.Windows.Forms.Button CloseButton;
     }
 }

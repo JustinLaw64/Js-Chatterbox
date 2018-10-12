@@ -61,12 +61,22 @@ namespace JsChatterBox
 
         private void FormUpdateTimer_Tick(object sender, EventArgs e)
         {
-            _ServerInstance.RunCycle();
+            _ServerInstance.RunCycle(FormUpdateTimer.Interval / 1000f);
             UpdateClientListBox();
         }
-        private void ClearLogButton_Click(object sender, EventArgs e) { ClearLog(); }
+        private void ClearLogMenuItem_Click(object sender, EventArgs e) { ClearLog(); }
+        private void HelpAboutMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox NewWindow = new AboutBox();
+            NewWindow.ShowDialog(this);
+        }
         private void ShutdownButton_Click(object sender, EventArgs e) { Close(); }
 
         private void ServerWindow_FormClosed(object sender, FormClosedEventArgs e) { ShutdownServer(); }
+
+        private void ConnectLocalButton_Click(object sender, EventArgs e)
+        {
+            Program.OpenChatConnection("127.0.0.1", NetworkConstants.DefaultServerPort);
+        }
     }
 }

@@ -38,10 +38,10 @@
             this.SendMesageButton = new System.Windows.Forms.Button();
             this.ChatLogTextBox = new System.Windows.Forms.TextBox();
             this.FormUpdateTimer = new System.Windows.Forms.Timer(this.components);
-            this.CopyrightNoticeLabel = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ClearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConnectionSettingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.MainSplitContainer)).BeginInit();
             this.MainSplitContainer.Panel1.SuspendLayout();
             this.MainSplitContainer.Panel2.SuspendLayout();
@@ -140,24 +140,15 @@
             // 
             // FormUpdateTimer
             // 
-            this.FormUpdateTimer.Interval = 200;
+            this.FormUpdateTimer.Interval = 500;
             this.FormUpdateTimer.Tick += new System.EventHandler(this.FormUpdateTimer_Tick);
-            // 
-            // CopyrightNoticeLabel
-            // 
-            this.CopyrightNoticeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CopyrightNoticeLabel.AutoSize = true;
-            this.CopyrightNoticeLabel.Location = new System.Drawing.Point(309, 268);
-            this.CopyrightNoticeLabel.Name = "CopyrightNoticeLabel";
-            this.CopyrightNoticeLabel.Size = new System.Drawing.Size(143, 13);
-            this.CopyrightNoticeLabel.TabIndex = 8;
-            this.CopyrightNoticeLabel.Text = "Copyright © Justin Law 2016";
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ClearLogMenuItem,
-            this.ConnectionSettingsMenuItem});
+            this.ConnectionSettingsMenuItem,
+            this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(464, 24);
@@ -168,7 +159,7 @@
             // 
             this.ClearLogMenuItem.Name = "ClearLogMenuItem";
             this.ClearLogMenuItem.Size = new System.Drawing.Size(69, 20);
-            this.ClearLogMenuItem.Text = "Clear Log";
+            this.ClearLogMenuItem.Text = "Clear &Log";
             this.ClearLogMenuItem.Click += new System.EventHandler(this.ClearLogMenuItem_Click);
             // 
             // ConnectionSettingsMenuItem
@@ -178,19 +169,25 @@
             this.ConnectionSettingsMenuItem.Text = "&Connection...";
             this.ConnectionSettingsMenuItem.Click += new System.EventHandler(this.ConnectionSettingsMenuItem_Click);
             // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.aboutToolStripMenuItem.Text = "&About...";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.HelpAboutMenuItem_Click);
+            // 
             // ClientWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(464, 281);
-            this.Controls.Add(this.CopyrightNoticeLabel);
             this.Controls.Add(this.MainSplitContainer);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(480, 320);
             this.Name = "ClientWindow";
-            this.Text = "Js ChatterBox Version 0.1";
+            this.Text = "Js ChatterBox Client";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatForm_FormClosed);
             this.MainSplitContainer.Panel1.ResumeLayout(false);
             this.MainSplitContainer.Panel1.PerformLayout();
@@ -215,10 +212,10 @@
         private System.Windows.Forms.Timer FormUpdateTimer;
         private System.Windows.Forms.Label OutputBoxLabel;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label CopyrightNoticeLabel;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem ConnectionSettingsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ClearLogMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }
 

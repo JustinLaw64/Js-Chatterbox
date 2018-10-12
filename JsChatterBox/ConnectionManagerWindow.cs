@@ -20,7 +20,7 @@ namespace JsChatterBox
         }
         private void ConnectionManagerWindow_Load(object sender, EventArgs e)
         {
-            ClientNameTextBox.Text = _ClientInstance.ClientName;
+            ClientNameTextBox.Text = _ClientInstance.ClientID.Name;
             HostAddressBox.Text = _ClientInstance.ConnectedHostName;
             UpdateConnectionControls();
         }
@@ -30,18 +30,11 @@ namespace JsChatterBox
         private void ChangeNameCommand()
         {
             String NewName = ClientNameTextBox.Text;
-            if (NewName != _ClientInstance.ClientName)
+            if (NewName != _ClientInstance.ClientID.Name)
                 _ClientInstance.ChangeName(NewName);
         }
-        private void ConnectCommand() { _ClientInstance.Connect(HostAddressBox.Text); UpdateConnectionControls(); }
-        private void DisconnectCommand() { _ClientInstance.Disconnect(); UpdateConnectionControls(); }
-        private void CreateServerCommand()
-        {
-            ServerWindow NewWindow = new ServerWindow();
-            NewWindow.Show();
-
-            HostAddressBox.Text = "127.0.0.1";
-        }
+        private void ConnectCommand() { _ClientInstance.BeginConnect(HostAddressBox.Text, NetworkConstants.DefaultServerPort); UpdateConnectionControls(); }
+        private void DisconnectCommand() { _ClientInstance.BeginDisconnect(); UpdateConnectionControls(); }
 
         private void UpdateConnectionControls()
         {
@@ -50,7 +43,6 @@ namespace JsChatterBox
             ConnectButton.Enabled = !connected;
             DisconnectButton.Enabled = connected;
             HostAddressBox.ReadOnly = connected;
-            CreateServerButton.Enabled = !connected;
         }
 
         private void ClientNameChangeButton_Click(object sender, EventArgs e) { ChangeNameCommand(); }
@@ -58,10 +50,7 @@ namespace JsChatterBox
         private void ConnectButton_Click(object sender, EventArgs e) { ConnectCommand(); }
         private void DisconnectButton_Click(object sender, EventArgs e) { DisconnectCommand(); }
         private void HostAddressBox_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter && !HostAddressBox.ReadOnly) ConnectCommand(); }
-        private void CreateServerButton_Click(object sender, EventArgs e) { CreateServerCommand(); }
 
         private void CloseButton_Click(object sender, EventArgs e) { this.Close(); }
-
-
     }
 }

@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsNetworkChat", "JsNetworkChat\JsNetworkChat.csproj", "{53E633FD-2F8B-483C-A081-D24C750B10EC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Files", "Shared Files", "{29DF8455-CF9E-40A0-AFD7-5E826DCCF58C}"
+	ProjectSection(SolutionItems) = preProject
+		Shared Files\EncoderCode.cs = Shared Files\EncoderCode.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsNetworkChat", "JsChatterBox\JsNetworkChat.csproj", "{53E633FD-2F8B-483C-A081-D24C750B10EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
