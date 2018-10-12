@@ -14,15 +14,8 @@ namespace JsChatterBox
 {
     public partial class ClientWindow : Form
     {
-        public PeerConnection ClientInstance { get { return _c; } }
-        public bool OwnsConnection = false;
-        private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            _c.OnHumanLogOutput -= LogMessage;
-            if (OwnsConnection)
-                _c.Dispose();
-            _c = null;
-        }
+        public PeerConnection Connection { get { return _c; } }
+        public bool OwnsConnection = false; // Can I automatically dispose the connection?
 
         public ClientWindow(PeerConnection Connection)
         {
@@ -62,7 +55,7 @@ namespace JsChatterBox
                 _c.SendHumanMessage(MessageText);
             }
         }
-
+        
         private void UpdatePeopleList()
         {
             Dictionary<int, PeerIdentity> people = _c.GetGuestList();
@@ -90,6 +83,7 @@ namespace JsChatterBox
             this.Text = NewTitleBarName;
         }
 
+        // Form Events
         private void SendMesageButton_Click(object sender, EventArgs e) { SendMessageCommand(); }
         private void MessageTextBox_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) SendMessageCommand(); }
         private void ClearLogMenuItem_Click(object sender, EventArgs e) { ClearLog(); }
@@ -98,13 +92,19 @@ namespace JsChatterBox
             AboutBox NewWindow = new AboutBox();
             NewWindow.ShowDialog(this);
         }
-
         private void FormUpdateTimer_Tick(object sender, EventArgs e)
         {
             _c.RunCycle(FormUpdateTimer.Interval / 1000f);
 
             UpdatePeopleList();
             UpdateGeneralControls();
+        }
+        private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            _c.OnHumanLogOutput -= LogMessage;
+            if (OwnsConnection)
+                _c.Dispose();
+            _c = null;
         }
     }
 }

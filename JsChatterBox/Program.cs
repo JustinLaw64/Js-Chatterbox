@@ -56,7 +56,7 @@ namespace JsChatterBox
 
         // Data
         public String UserName = null;
-        public int WorkingPort = NetworkConstants.DefaultServerPort; // To tailor to the user's specified port.
+        public int WorkingPort = NetworkConfig.DefaultServerPort; // To tailor to the user's specified port.
         public UserHostList HostList = null;
 
         public void Save()
@@ -90,7 +90,7 @@ namespace JsChatterBox
                 if (FileIO.Exists(ConfigFilePath)) FileIO.Move(ConfigFilePath, ConfigFileBackupPath);
                 if (FileIO.Exists(HostListFilePath)) FileIO.Move(HostListFilePath, HostListFileBackupPath);
 
-                FileIO.WriteAllText(VersionFilePath, NetworkConstants.VersionString, System.Text.Encoding.Unicode);
+                FileIO.WriteAllText(VersionFilePath, NetworkConfig.VersionString, System.Text.Encoding.Unicode);
                 FileIO.WriteAllText(ConfigFilePath, ConfigAsText, System.Text.Encoding.Unicode);
                 FileIO.WriteAllText(HostListFilePath, HostListAsText, System.Text.Encoding.Unicode);
             }
@@ -103,7 +103,7 @@ namespace JsChatterBox
             if (ve)
             {
                 String VersionFileContents = FileIO.ReadAllText(VersionFilePath, System.Text.Encoding.Unicode);
-                if (VersionFileContents == NetworkConstants.VersionString)
+                if (VersionFileContents == NetworkConfig.VersionString)
                     r = true;
                 else
                 {
@@ -159,7 +159,7 @@ namespace JsChatterBox
             {
                 UserName = "Unnamed";
                 HostList = new UserHostList();
-                WorkingPort = NetworkConstants.DefaultServerPort;
+                WorkingPort = NetworkConfig.DefaultServerPort;
             }
             _IsLoaded = true;
             return r;

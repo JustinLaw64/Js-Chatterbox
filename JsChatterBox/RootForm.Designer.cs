@@ -36,6 +36,7 @@
             this.clearRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HostNameTextBox = new System.Windows.Forms.TextBox();
             this.ConnectButton = new System.Windows.Forms.Button();
@@ -49,7 +50,6 @@
             this.RequestAnswerer_AnswerButton = new System.Windows.Forms.Button();
             this.RequestAnswerer_ListBox = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.createServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -66,7 +66,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(384, 24);
-            this.menuStrip1.TabIndex = 11;
+            this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
@@ -106,6 +106,13 @@
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
             // 
+            // createServerToolStripMenuItem
+            // 
+            this.createServerToolStripMenuItem.Name = "createServerToolStripMenuItem";
+            this.createServerToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
+            this.createServerToolStripMenuItem.Text = "Create Server";
+            this.createServerToolStripMenuItem.Click += new System.EventHandler(this.CreateServerMenuItem_Click);
+            // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
@@ -120,7 +127,7 @@
             this.HostNameTextBox.Location = new System.Drawing.Point(12, 16);
             this.HostNameTextBox.Name = "HostNameTextBox";
             this.HostNameTextBox.Size = new System.Drawing.Size(136, 20);
-            this.HostNameTextBox.TabIndex = 12;
+            this.HostNameTextBox.TabIndex = 2;
             this.HostNameTextBox.TextChanged += new System.EventHandler(this.HostParameterTextBox_TextChanged);
             this.HostNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ConnectionParameterBox_KeyDown);
             // 
@@ -130,7 +137,7 @@
             this.ConnectButton.Location = new System.Drawing.Point(143, 152);
             this.ConnectButton.Name = "ConnectButton";
             this.ConnectButton.Size = new System.Drawing.Size(75, 23);
-            this.ConnectButton.TabIndex = 15;
+            this.ConnectButton.TabIndex = 6;
             this.ConnectButton.Text = "&Connect";
             this.ConnectButton.UseVisualStyleBackColor = true;
             this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
@@ -142,7 +149,7 @@
             this.HostPortTextBox.MaxLength = 6;
             this.HostPortTextBox.Name = "HostPortTextBox";
             this.HostPortTextBox.Size = new System.Drawing.Size(64, 20);
-            this.HostPortTextBox.TabIndex = 16;
+            this.HostPortTextBox.TabIndex = 3;
             this.HostPortTextBox.TextChanged += new System.EventHandler(this.HostParameterTextBox_TextChanged);
             this.HostPortTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ConnectionParameterBox_KeyDown);
             // 
@@ -152,7 +159,7 @@
             this.FavoriteToggleButton.Location = new System.Drawing.Point(62, 152);
             this.FavoriteToggleButton.Name = "FavoriteToggleButton";
             this.FavoriteToggleButton.Size = new System.Drawing.Size(75, 23);
-            this.FavoriteToggleButton.TabIndex = 17;
+            this.FavoriteToggleButton.TabIndex = 5;
             this.FavoriteToggleButton.Text = "F&avorite";
             this.FavoriteToggleButton.UseVisualStyleBackColor = true;
             this.FavoriteToggleButton.Click += new System.EventHandler(this.FavoriteToggleButton_Click);
@@ -168,7 +175,7 @@
             this.label1.Location = new System.Drawing.Point(9, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(163, 13);
-            this.label1.TabIndex = 13;
+            this.label1.TabIndex = 1;
             this.label1.Text = "Who do you want to connect to?";
             // 
             // splitContainer1
@@ -197,7 +204,7 @@
             this.splitContainer1.Panel2MinSize = 150;
             this.splitContainer1.Size = new System.Drawing.Size(384, 187);
             this.splitContainer1.SplitterDistance = 221;
-            this.splitContainer1.TabIndex = 18;
+            this.splitContainer1.TabIndex = 11;
             // 
             // HostSelectionList
             // 
@@ -210,7 +217,7 @@
             this.HostSelectionList.Name = "HostSelectionList";
             this.HostSelectionList.ScrollAlwaysVisible = true;
             this.HostSelectionList.Size = new System.Drawing.Size(206, 104);
-            this.HostSelectionList.TabIndex = 14;
+            this.HostSelectionList.TabIndex = 4;
             this.HostSelectionList.SelectedValueChanged += new System.EventHandler(this.HostSelectionList_SelectedValueChanged);
             this.HostSelectionList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ConnectionParameterBox_KeyDown);
             // 
@@ -221,7 +228,7 @@
             this.RequestAnswerer_ListenCheckBox.Location = new System.Drawing.Point(3, 156);
             this.RequestAnswerer_ListenCheckBox.Name = "RequestAnswerer_ListenCheckBox";
             this.RequestAnswerer_ListenCheckBox.Size = new System.Drawing.Size(54, 17);
-            this.RequestAnswerer_ListenCheckBox.TabIndex = 17;
+            this.RequestAnswerer_ListenCheckBox.TabIndex = 9;
             this.RequestAnswerer_ListenCheckBox.Text = "&Listen";
             this.RequestAnswerer_ListenCheckBox.UseVisualStyleBackColor = true;
             this.RequestAnswerer_ListenCheckBox.CheckedChanged += new System.EventHandler(this.RequestAnswerer_ListenCheckBox_CheckedChanged);
@@ -232,7 +239,7 @@
             this.RequestAnswerer_AnswerButton.Location = new System.Drawing.Point(72, 152);
             this.RequestAnswerer_AnswerButton.Name = "RequestAnswerer_AnswerButton";
             this.RequestAnswerer_AnswerButton.Size = new System.Drawing.Size(75, 23);
-            this.RequestAnswerer_AnswerButton.TabIndex = 16;
+            this.RequestAnswerer_AnswerButton.TabIndex = 10;
             this.RequestAnswerer_AnswerButton.Text = "&Answer";
             this.RequestAnswerer_AnswerButton.UseVisualStyleBackColor = true;
             this.RequestAnswerer_AnswerButton.Click += new System.EventHandler(this.RequestAnswerer_AnswerButton_Click);
@@ -248,7 +255,7 @@
             this.RequestAnswerer_ListBox.Name = "RequestAnswerer_ListBox";
             this.RequestAnswerer_ListBox.ScrollAlwaysVisible = true;
             this.RequestAnswerer_ListBox.Size = new System.Drawing.Size(144, 130);
-            this.RequestAnswerer_ListBox.TabIndex = 15;
+            this.RequestAnswerer_ListBox.TabIndex = 8;
             this.RequestAnswerer_ListBox.SelectedValueChanged += new System.EventHandler(this.RequestAnswerer_ListBox_SelectedValueChanged);
             // 
             // label2
@@ -257,15 +264,8 @@
             this.label2.Location = new System.Drawing.Point(0, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(123, 13);
-            this.label2.TabIndex = 14;
+            this.label2.TabIndex = 7;
             this.label2.Text = "Incoming Chat Requests";
-            // 
-            // createServerToolStripMenuItem
-            // 
-            this.createServerToolStripMenuItem.Name = "createServerToolStripMenuItem";
-            this.createServerToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
-            this.createServerToolStripMenuItem.Text = "Create Server";
-            this.createServerToolStripMenuItem.Click += new System.EventHandler(this.CreateServerMenuItem_Click);
             // 
             // RootForm
             // 
