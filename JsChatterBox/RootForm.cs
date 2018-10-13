@@ -108,7 +108,6 @@ namespace JsChatterBox
         }
         private void ExitMenuItem_Click(object sender, EventArgs e) { this.Close(); }
         private void CreateServerMenuItem_Click(object sender, EventArgs e) { CreateServerCommand(); }
-        private void OpenShellMenuItem_Click(object sender, EventArgs e) { (new ShellWindow()).Show(); }
         private void HelpAboutMenuItem_Click(object sender, EventArgs e)
         {
             AboutBox NewWindow = new AboutBox();
