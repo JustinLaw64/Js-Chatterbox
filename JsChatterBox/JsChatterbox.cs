@@ -20,7 +20,7 @@ namespace JsChatterBox.Networking
     public static class NetworkConfig
     {
         public const int DefaultServerPort = 28760;
-        public const String VersionString = "V0.5dev"; // Protocol Version
+        public const String VersionString = "V0.1"; // Protocol Version
         
         public const float HeartBeatInterval = 0.5f;
         public const float HeartBeatSilenceTimeout = 10f;
@@ -203,7 +203,10 @@ namespace JsChatterBox.Networking
         public void SendHumanMessage(string Contents)
         {
             if (!string.IsNullOrEmpty(Contents))
+            {
                 SendMessage("HUMANMESSAGE", Contents);
+                Log_Write(string.Concat("[You] ", Contents));
+            }
         }
         public PeerMessage[] CollectInboxMessages()
         {
@@ -652,7 +655,7 @@ namespace JsChatterBox.Networking
             {
                 while (_ListenerSocket.Pending())
                 {
-                    PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener("Old Server", _ListenerSocket);
+                    PeerConnection NewConnection = PeerConnection.AcceptConnectionFromTcpListener("Some Guy's Server", _ListenerSocket);
                     ClientInfo NewClient = new ClientInfo(this, NewConnection, _NextGuestId);
                     _Clients.Add(NewClient);
                     Log_Write_System(string.Format("A new guest has connected! It was assigned an ID of {0}.", _NextGuestId));

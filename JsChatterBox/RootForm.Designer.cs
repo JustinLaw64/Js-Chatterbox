@@ -278,7 +278,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(400, 250);
             this.Name = "RootForm";
-            this.Text = "Js ChatterBox Version 0.4";
+            this.Text = "Js ChatterBox Version 0.1";
             this.Activated += new System.EventHandler(this.RootForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RootForm_FormClosing);
             this.menuStrip1.ResumeLayout(false);

@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Js ChatterBox")]
-[assembly: AssemblyDescription("This program was created by Justin Law. It's purpose is to be used as a decentralized chat system for people to use. I'm tired of seeing people use soley Facebook for their online communications. I know, you can't send pictures and money with this, but a plain-text decentralized system is better than none. :)")]
+[assembly: AssemblyDescription("This is a chat program created by Justin Law. Disclaimer: Justin Law disclaims all liability regarding your or anyone else's use of this program, as well as all guarantees regarding it, whether implied or not. You may proceed at your own risk!")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Justin Law")]
 [assembly: AssemblyProduct("Js ChatterBox")]
-[assembly: AssemblyCopyright("Copyright © Justin Law 2016")]
+[assembly: AssemblyCopyright("Copyright © Justin Law 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.0.0")]
-[assembly: AssemblyFileVersion("0.4.0.0")]
+[assembly: AssemblyVersion("0.1.0.0")]
+[assembly: AssemblyFileVersion("0.1.0.0")]
