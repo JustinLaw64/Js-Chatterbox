@@ -32,26 +32,26 @@ namespace JsChatterBox.Networking
         public JsEncoder.TableValue Table;
         
         public String Header;
-        public JsEncoder.ValueBase Contents1V;
-        public JsEncoder.ValueBase Contents2V;
+        public JsEncoder.IAbstractValue Contents1V;
+        public JsEncoder.IAbstractValue Contents2V;
         public String Contents1S;
         public String Contents2S;
 
         public PeerMessage(JsEncoder.TableValue Table)
         {
             this.Table = Table;
-            JsEncoder.StringValue headerV = (JsEncoder.StringValue)Table.Get(1);
-            Header = headerV.GetValue();
+            JsEncoder.StringValue headerV = (JsEncoder.StringValue)Table[1];
+            Header = headerV.Value;
 
             // First two values
-            Contents1V = Table.Get(2);
-            Contents2V = Table.Get(3);
+            Contents1V = Table[2];
+            Contents2V = Table[3];
 
             // Convert them to Strings
-            JsEncoder.StringValue contents1SV = Contents1V as JsEncoder.StringValue;
-            JsEncoder.StringValue contents2SV = Contents2V as JsEncoder.StringValue;
-            Contents1S = contents1SV?.GetValue();
-            Contents2S = contents2SV?.GetValue();
+            JsEncoder.StringValue? contents1SV = Contents1V as JsEncoder.StringValue?;
+            JsEncoder.StringValue? contents2SV = Contents2V as JsEncoder.StringValue?;
+            Contents1S = contents1SV?.Value;
+            Contents2S = contents2SV?.Value;
         }
     }
     public class PeerConnection : IDisposable, ITextOutputLogger
@@ -126,7 +126,7 @@ namespace JsChatterBox.Networking
                 Log_Write_System("Disconnecting...");
                 if (WarnOtherPeer)
                 {
-                    JsEncoder.ValueBase[] Param2 = new JsEncoder.ValueBase[1];
+                    JsEncoder.IAbstractValue[] Param2 = new JsEncoder.IAbstractValue[1];
                     Param2[0] = new JsEncoder.IntValue(0);
                     SendMessage("DISCONNECTING", Param2, true);
                 }
@@ -160,25 +160,25 @@ namespace JsChatterBox.Networking
 
         public void SendMessage(string MessageHeader, string Contents)
         {
-            JsEncoder.ValueBase[] NewArray = new JsEncoder.ValueBase[1];
+            JsEncoder.IAbstractValue[] NewArray = new JsEncoder.IAbstractValue[1];
             NewArray[0] = new JsEncoder.StringValue(Contents);
             SendMessage(MessageHeader, NewArray);
         }
-        public void SendMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents) { SendMessage(MessageHeader, Contents, false); }
-        public void SendMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents, bool SendImmediately)
+        public void SendMessage(string MessageHeader, IEnumerable<JsEncoder.IAbstractValue> Contents) { SendMessage(MessageHeader, Contents, false); }
+        public void SendMessage(string MessageHeader, IEnumerable<JsEncoder.IAbstractValue> Contents, bool SendImmediately)
         {
             AssertNotDisposed();
 
             if (_ConnectionStatus == 1 || _ConnectionStatus == 2)
             {
-                List<JsEncoder.ValueBase> ResponseArray = new List<JsEncoder.ValueBase>() { new JsEncoder.StringValue(MessageHeader) };
-                foreach (JsEncoder.ValueBase item in Contents)
+                List<JsEncoder.IAbstractValue> ResponseArray = new List<JsEncoder.IAbstractValue>() { new JsEncoder.StringValue(MessageHeader) };
+                foreach (JsEncoder.IAbstractValue item in Contents)
                     ResponseArray.Add(item);
                 JsEncoder.TableValue ResponseTable = JsEncoder.TableValue.ArrayToTable(ResponseArray.ToArray());
 
                 if (SendImmediately)
                 {
-                    JsEncoder.ValueBase[] Param1 = new JsEncoder.ValueBase[1];
+                    JsEncoder.IAbstractValue[] Param1 = new JsEncoder.IAbstractValue[1];
                     Param1[0] = ResponseTable;
                     Encoding_SendInput(Param1);
                 }
@@ -190,7 +190,7 @@ namespace JsChatterBox.Networking
         {
             if (_ConnectionStatus == 2 & !_GreetingSent)
             {
-                JsEncoder.ValueBase[] Values = new JsEncoder.ValueBase[2];
+                JsEncoder.IAbstractValue[] Values = new JsEncoder.IAbstractValue[2];
                 Values[0] = new JsEncoder.StringValue(NetworkConfig.VersionString);
                 Values[1] = new JsEncoder.StringValue(_ThisPeerID);
 
@@ -282,8 +282,8 @@ namespace JsChatterBox.Networking
                     // ## BEGIN Receive
 
                     // Check on what was received.
-                    JsEncoder.ValueBase[] output = Encoding_CollectOutput();
-                    foreach (JsEncoder.ValueBase item in output)
+                    JsEncoder.IAbstractValue[] output = Encoding_CollectOutput();
+                    foreach (JsEncoder.IAbstractValue item in output)
                     {
                         // Debug
                         //LogSystemHumanMessage("RECEIVED: " + JsEncoder.EncoderStream.EncodeValue(item));
@@ -382,7 +382,7 @@ namespace JsChatterBox.Networking
         private System.Text.Encoding _EncodingFormat = System.Text.Encoding.Unicode;
         private string _ThisPeerID = null;
         private string _OtherPeerID = null;
-        private List<JsEncoder.ValueBase> _MessageOutbox = new List<JsEncoder.ValueBase>();
+        private List<JsEncoder.IAbstractValue> _MessageOutbox = new List<JsEncoder.IAbstractValue>();
         private List<PeerMessage> _MessageInbox = new List<PeerMessage>();
         private List<string> _Log_PendingOutput = new List<string>();
         private int _ConnectionStatus = 0; // 0 = Disconnected, 1 = Connected, 2 = Connecting, 3 = Disconnecting
@@ -397,17 +397,17 @@ namespace JsChatterBox.Networking
         private void OutputMessage(PeerMessage Message) { _MessageInbox.Add(Message); }
         private void Log_Write(string Line) { _Log_PendingOutput.Add(Line); }
         private void Log_Write_System(string Line) { Log_Write(string.Concat("[Connection] ", Line)); }
-        private void Encoding_SendInput(IEnumerable<JsEncoder.ValueBase> Data)
+        private void Encoding_SendInput(IEnumerable<JsEncoder.IAbstractValue> Data)
         {
             // Encode Data
-            foreach (JsEncoder.ValueBase item in Data)
+            foreach (JsEncoder.IAbstractValue item in Data)
                 _Encoder.InputValue(item);
             string EncodedString = _Encoder.PopOutput();
             char[] EncodedChars = EncodedString.ToCharArray();
             byte[] EncodedBytes = _EncodingFormat.GetBytes(EncodedChars);
             _Socket.Client.Send(EncodedBytes);
         }
-        private JsEncoder.ValueBase[] Encoding_CollectOutput()
+        private JsEncoder.IAbstractValue[] Encoding_CollectOutput()
         {
             // Receive Bytes
             int NumberOfBytes = _Socket.Available;
@@ -736,13 +736,13 @@ namespace JsChatterBox.Networking
         }
 
         private void SendMessage(ClientInfo Client, string MessageHeader, string Contents) { Client.C.SendMessage(MessageHeader, Contents); }
-        private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents) { Client.C.SendMessage(MessageHeader, Contents); }
+        private void SendMessage(ClientInfo Client, string MessageHeader, IEnumerable<JsEncoder.IAbstractValue> Contents) { Client.C.SendMessage(MessageHeader, Contents); }
         private void BroadcastMessage(string MessageHeader, string Contents)
         {
             foreach (ClientInfo item in _Clients.ToArray())
                 item.C.SendMessage(MessageHeader, Contents);
         }
-        private void BroadcastMessage(string MessageHeader, IEnumerable<JsEncoder.ValueBase> Contents)
+        private void BroadcastMessage(string MessageHeader, IEnumerable<JsEncoder.IAbstractValue> Contents)
         {
             foreach (ClientInfo item in _Clients.ToArray())
                 item.C.SendMessage(MessageHeader, Contents);

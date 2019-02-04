@@ -70,8 +70,8 @@ namespace JsChatterBox
                 #region ConfigFileSaving
                 {
                     JsEncoder.TableValue ConfigTable = new JsEncoder.TableValue();
-                    ConfigTable.Set(new JsEncoder.StringValue("UserName"), new JsEncoder.StringValue(UserName));
-                    ConfigTable.Set(new JsEncoder.StringValue("WorkingPort"), new JsEncoder.IntValue(WorkingPort));
+                    ConfigTable[new JsEncoder.StringValue("UserName")] = new JsEncoder.StringValue(UserName);
+                    ConfigTable[new JsEncoder.StringValue("WorkingPort")] = new JsEncoder.IntValue(WorkingPort);
 
                     ConfigAsText = JsEncoder.EncoderStream.EncodeTable(ConfigTable);
                 }
@@ -124,8 +124,8 @@ namespace JsChatterBox
                         String ConfigText = FileIO.ReadAllText(ConfigFilePath, System.Text.Encoding.Unicode);
                         JsEncoder.TableValue ConfigTable = (JsEncoder.TableValue)JsEncoder.DecoderStream.DecodeValue(ConfigText);
 
-                        UserName = ((JsEncoder.StringValue)ConfigTable.Get(new JsEncoder.StringValue("UserName"))).GetValue();
-                        WorkingPort = ((JsEncoder.IntValue)ConfigTable.Get(new JsEncoder.StringValue("WorkingPort"))).GetValue();
+                        UserName = ((JsEncoder.StringValue)ConfigTable[new JsEncoder.StringValue("UserName")]).Value;
+                        WorkingPort = ((JsEncoder.IntValue)ConfigTable[new JsEncoder.StringValue("WorkingPort")]).Value;
                     }
                     #endregion
 
@@ -166,7 +166,7 @@ namespace JsChatterBox
 
         private bool _IsLoaded = false;
 
-        public static String DataSavePath { get { return ("{0}\\JsChatterBox").Replace("{0}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)); } }
+        public static String DataSavePath { get { return "{0}\\JsChatterBox".Replace("{0}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)); } }
         public static String VersionFilePath { get { return String.Concat(DataSavePath, "\\Version.dat"); } }
         public static String ConfigFilePath { get { return String.Concat(DataSavePath, "\\Config.dat"); } }
         public static String HostListFilePath { get { return String.Concat(DataSavePath, "\\HostList.dat"); } }
@@ -181,8 +181,8 @@ namespace JsChatterBox
             JsEncoder.TableValue t = new JsEncoder.TableValue();
             JsEncoder.TableValue ft = new JsEncoder.TableValue();
             JsEncoder.TableValue rt = new JsEncoder.TableValue();
-            t.Set(1, ft);
-            t.Set(2, rt);
+            t[1] = ft;
+            t[2] = rt;
             HostInformation[] fa = Value.FavoriteHosts.ToArray();
             HostInformation[] ra = Value.RecentHosts.ToArray();
             int fl = fa.Length;
@@ -190,30 +190,30 @@ namespace JsChatterBox
             for (int i = 0; i < fl; i++)
             {
                 JsEncoder.TableValue item = HostInformation.ToTable(fa[i]);
-                ft.Set(i + 1, item);
+                ft[i + 1] = item;
             }
             for (int i = 0; i < rl; i++)
             {
                 JsEncoder.TableValue item = HostInformation.ToTable(ra[i]);
-                rt.Set(i + 1, item);
+                rt[i + 1] = item;
             }
 
             return t;
         }
         public static UserHostList FromTable(JsEncoder.TableValue Value)
         {
-            JsEncoder.TableValue ft = (JsEncoder.TableValue)Value.Get(1);
-            JsEncoder.TableValue rt = (JsEncoder.TableValue)Value.Get(2);
-            JsEncoder.TableDigested ftd = ft.DigestTable();
-            JsEncoder.TableDigested rtd = rt.DigestTable();
+            JsEncoder.TableValue ft = (JsEncoder.TableValue)Value[1];
+            JsEncoder.TableValue rt = (JsEncoder.TableValue)Value[2];
             UserHostList r = new UserHostList();
-            foreach (var item in ftd.AutoIntArray)
+            for (int i = 1; ft.ContainsKey(i); i++)
             {
+                JsEncoder.IAbstractValue item = ft[i];
                 JsEncoder.TableValue v = (JsEncoder.TableValue)item;
                 r.FavoriteHosts.Add(HostInformation.FromTable(v));
             }
-            foreach (var item in rtd.AutoIntArray)
+            for (int i = 1; rt.ContainsKey(i); i++)
             {
+                JsEncoder.IAbstractValue item = rt[i];
                 JsEncoder.TableValue v = (JsEncoder.TableValue)item;
                 r.RecentHosts.Add(HostInformation.FromTable(v));
             }
@@ -231,15 +231,15 @@ namespace JsChatterBox
         public static JsEncoder.TableValue ToTable(HostInformation Value)
         {
             JsEncoder.TableValue r = new JsEncoder.TableValue();
-            r.Set(1, new JsEncoder.StringValue(Value.HostName));
-            r.Set(2, new JsEncoder.IntValue(Value.Port));
+            r[1] = new JsEncoder.StringValue(Value.HostName);
+            r[2] = new JsEncoder.IntValue(Value.Port);
             return r;
         }
         public static HostInformation FromTable(JsEncoder.TableValue Value)
         {
-            JsEncoder.StringValue HostNameV = (JsEncoder.StringValue)Value.Get(1);
-            JsEncoder.IntValue PortV = (JsEncoder.IntValue)Value.Get(2);
-            return new HostInformation(HostNameV.GetValue(), PortV.GetValue());
+            JsEncoder.StringValue HostNameV = (JsEncoder.StringValue)Value[1];
+            JsEncoder.IntValue PortV = (JsEncoder.IntValue)Value[2];
+            return new HostInformation(HostNameV.Value, PortV.Value);
         }
 
         public HostInformation(String HostName, int Port)
