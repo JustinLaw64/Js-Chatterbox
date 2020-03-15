@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JsChatterBox</RootNamespace>
     <AssemblyName>JsChatterBox</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
@@ -60,7 +60,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -104,7 +104,6 @@
       <DependentUpon>ConfigurationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="JsChatterBox.cs" />
-    <Compile Include="JsEncoder.cs" />
     <Compile Include="RootForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -176,6 +175,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JsEncoder\JsEncoder.csproj">
+      <Project>{cfdbdd19-41d6-4bf9-962b-88b2a9a8a012}</Project>
+      <Name>JsEncoder</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

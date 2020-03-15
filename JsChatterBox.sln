@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsChatterBox", "JsChatterBox\JsChatterBox.csproj", "{53E633FD-2F8B-483C-A081-D24C750B10EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsEncoderTest", "JsEncoderTest\JsEncoderTest.csproj", "{73F7A63E-626D-48F6-B251-85D5C932C238}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsEncoder", "JsEncoder\JsEncoder.csproj", "{CFDBDD19-41D6-4BF9-962B-88B2A9A8A012}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{53E633FD-2F8B-483C-A081-D24C750B10EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53E633FD-2F8B-483C-A081-D24C750B10EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53E633FD-2F8B-483C-A081-D24C750B10EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73F7A63E-626D-48F6-B251-85D5C932C238}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73F7A63E-626D-48F6-B251-85D5C932C238}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73F7A63E-626D-48F6-B251-85D5C932C238}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73F7A63E-626D-48F6-B251-85D5C932C238}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFDBDD19-41D6-4BF9-962B-88B2A9A8A012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFDBDD19-41D6-4BF9-962B-88B2A9A8A012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFDBDD19-41D6-4BF9-962B-88B2A9A8A012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFDBDD19-41D6-4BF9-962B-88B2A9A8A012}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
